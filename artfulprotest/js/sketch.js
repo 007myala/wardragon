@@ -40,7 +40,10 @@ function draw(){
      } else {
           // Person isn't raising the protest sign, show watch screen
           background(232);
-          ellipse(100,100,40,40);
+          textSize(100);
+          textAlign(CENTER,TOP);
+          var msg = "Climate change is real. Families are seperated at the border. Toxic masculinity kills."
+          text(msg, 0, 20, width, height);
      }
 }
 
