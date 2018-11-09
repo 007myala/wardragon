@@ -15,6 +15,9 @@ Vehicle.prototype.behaviors = function(){
      //this.applyForce(seek);
      var arrive = this.arrive(this.target);
      this.applyForce(arrive);
+
+     var seek = this.seek(this.target);
+     this.applyForce(seek);
 }
 
 Vehicle.prototype.applyForce = function(f){

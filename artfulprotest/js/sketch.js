@@ -46,8 +46,7 @@ function setup(){
      serial.open(serialPortName); // open the serial port
      serial.on('open', ardCon); // open the socket connection and execute the ardCon callback
      serial.on('data', dataReceived); // execute the dataReceived function when data is received
-     //frameRate(2);
-     frameRate(10);
+     //frameRate(10);
      hue = 0;
 
      // Steering dots
@@ -72,33 +71,47 @@ function setup(){
 }
 
 function draw(){
+     clear();
      if(isProtesting){
           // Check the sensor values and choose an animation
-          animation = 1;
+
+          if(sensor1 < 80){
+               animation = 2;
+          } else if(sensor1 < 100){
+               animation = 0;
+          } else {
+               animation = 1;
+          }
+
           if(animation == 0){
                // Dump Trump
+               frameRate(2);
                colorMode(RGB, 255);
-               background(0); // Black
+               background(199,21,133); // Violet
                var women = "W o m e n";
                var d = "D ";
                var tr = "T r ";
                var ump = "u m p";
-               textSize(120);
+               textSize(260);
                textAlign(CENTER,CENTER);
                textFont(blackoutFont);
                fill(255);
                noStroke();
+               /*
+               noStroke();
                text(women, 0, 0, width, height/2);
+               */
                if((dumpCnt % 2) == 0){
                     msg = d + ump;
-                    text(msg, 0, height/2, width, height/2);
+                    text(msg, 0, 0, width, height);
                } else {
                     msg = tr + ump;
-                    text(msg, 0, height/2, width, height/2);
+                    text(msg, 0, 0, width, height);
                }
                dumpCnt += 1;
           } else if(animation == 1){
                // Love is Love
+               frameRate(30);
                colorMode(RGB, 255);
                background(0); // Black
                textSize(150);
@@ -126,11 +139,25 @@ function draw(){
                // Hue - https://medium.com/@kellylougheed/rainbow-paintbrush-in-p5-js-e452d5540b25
                // Points - https://www.youtube.com/watch?v=4hA7G3gup-4
 
-          } else {
-               // Another animation here
+          } else if(animation == 2){
+               // Little Sign, Yuge Feminist
+               frameRate(30);
+               colorMode(RGB, 255);
+               background(0); // Black
+               noStroke();
+               textSize(100);
+               fill(255);
+               textFont(goudyFont);
+               text("LITTLE SIGN",0,10,width,height/4);
+               textFont(goudyFont);
+               textSize(180);
+               fill(128 + sin(frameCount*0.1) * 128);
+               text("Y U G E FEMINIST",0,height/4,width,(3*height)/4);
+               // animation https://creative-coding.decontextualize.com/text-and-type/
           }
      } else {
           // Person isn't raising the protest sign, show watch screen
+          frameRate(2);
           colorMode(RGB, 255);
           background(255);
           textSize(78);
@@ -169,6 +196,10 @@ function dataReceived(){
 /* Function to record arduino connection */
 function ardCon(){
      console.log("Connected to the Arduino. LISTEN UP");
+}
+
+function reset(){
+
 }
 
 /* Make the canvas responsive -- automatically resize the window */
