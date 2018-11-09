@@ -16,11 +16,19 @@
 var canvas;
 var serial; // serial port object
 var sensor1 = 0; // var to hold the value from "s1"
+var animation = 0; // var to hold indicator for which animation to play
 var serialPortName = "/dev/ttyACM0"; // Set this to your port
 var isProtesting = false; // Boolean, installation starts with watch screen
+var dumpCnt = 0;
+var blackoutFont;
+var goudyFont;
+var junctionFont;
+var msg, msg1;
 
 function preload(){
-     // Load any initial images here
+     blackoutFont = loadFont('./fonts/Blackout Sunrise.ttf');
+     goudyFont = loadFont('./fonts/OFLGoudyStM.otf');
+     junctionFont = loadFont('./fonts/Junction-bold.otf');
 }
 
 /* Automatically fill the window */
@@ -30,19 +38,45 @@ function setup(){
      serial.open(serialPortName); // open the serial port
      serial.on('open', ardCon); // open the socket connection and execute the ardCon callback
      serial.on('data', dataReceived); // execute the dataReceived function when data is received
+     frameRate(2);
 }
 
 function draw(){
      if(isProtesting){
+          background(0); // Black
           // Check the sensor values and choose an animation
-          background(0);
-          rect(100,100,40,40);
+          if(animation == 0){
+               // Dump Trump
+               var women = "W o m e n";
+               var d = "D ";
+               var tr = "T r ";
+               var ump = "u m p";
+               textSize(120);
+               textAlign(CENTER,CENTER);
+               textFont(blackoutFont);
+               fill(255);
+               text(women, 0, 0, width, height/2);
+               if((dumpCnt % 2) == 0){
+                    msg = d + ump;
+                    text(msg, 0, height/2, width, height/2);
+               } else {
+                    msg = tr + ump;
+                    text(msg, 0, height/2, width, height/2);
+               }
+               dumpCnt += 1;
+          } else if(animation == 1){
+               // Love is Love
+               var love = "L O V E";
+
+          }
      } else {
           // Person isn't raising the protest sign, show watch screen
-          background(232);
-          textSize(100);
+          background(255);
+          textSize(82);
+          textFont(goudyFont);
+          fill(0);
           textAlign(CENTER,TOP);
-          var msg = "Climate change is real. Families are seperated at the border. Toxic masculinity kills."
+          msg = "...Climate change is real...Time's up...Families are seperated at the border...Toxic masculinity kills...Hate crimes are on the rise...Black lives are in danger...We need stricter gun control..."
           text(msg, 0, 20, width, height);
      }
 }
@@ -63,8 +97,10 @@ function dataReceived(){
 
      if(sensor1 > 30){
           isProtesting = true;
+          print("Protesting");
      } else {
           isProtesting = false;
+          print("Watching");
      }
 }
 
