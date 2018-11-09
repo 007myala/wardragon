@@ -26,6 +26,10 @@ var junctionFont;
 var oldNewsFont;
 var msg, msg1;
 var hue;
+var vehicles = [];
+var love = "L O V E";
+var is = "I S"
+var love2 = "L O V E";
 
 function preload(){
      blackoutFont = loadFont('./fonts/Blackout Sunrise.ttf');
@@ -42,8 +46,29 @@ function setup(){
      serial.open(serialPortName); // open the serial port
      serial.on('open', ardCon); // open the socket connection and execute the ardCon callback
      serial.on('data', dataReceived); // execute the dataReceived function when data is received
-     frameRate(2);
+     //frameRate(2);
+     frameRate(10);
      hue = 0;
+
+     // Steering dots
+     var points = junctionFont.textToPoints(love2,2*width/8,5*height/6,200);
+     // console.log(points);
+     // console.log(points.length);
+     for(var i = 0; i < points.length; i++){
+          var pt = points[i];
+          var vehicle = new Vehicle(pt.x, pt.y, hue);
+          vehicles.push(vehicle);
+          // colorMode(HSL, 360);
+          // stroke(hue,200,200);
+          // strokeWeight(9);
+          // point(pt.x,pt.y);
+          if (hue > 360){
+               hue = 0;
+          } else {
+               hue++;
+          }
+     }
+
 }
 
 function draw(){
@@ -76,9 +101,6 @@ function draw(){
                // Love is Love
                colorMode(RGB, 255);
                background(0); // Black
-               var love = "L O V E";
-               var is = "I S"
-               var love2 = "L O V E";
                textSize(150);
                textAlign(CENTER,CENTER);
                textFont(junctionFont);
@@ -94,21 +116,12 @@ function draw(){
                textSize(50);
                text(is,0,height/4,width,height/3);
 
-               var points = junctionFont.textToPoints(love2,1*width/4,5*height/6,200);
-               // console.log(points);
-               var c = 0;
-               console.log(points.length);
-               for(var i = 0; i < points.length; i++){
-                    var pt = points[i];
-                    colorMode(HSL, 360);
-                    stroke(hue,200,200);
-                    strokeWeight(9);
-                    point(pt.x,pt.y);
-                    if (hue > 360){
-                         hue = 0;
-                    } else {
-                         hue++;
-                    }
+               // - moved stuff up maybe to draw loop.
+               for(var i = 0; i < vehicles.length; i++){
+                    var v = vehicles[i];
+                    v.behaviors();
+                    v.update();
+                    v.show();
                }
                // Hue - https://medium.com/@kellylougheed/rainbow-paintbrush-in-p5-js-e452d5540b25
                // Points - https://www.youtube.com/watch?v=4hA7G3gup-4
