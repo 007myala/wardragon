@@ -160,7 +160,7 @@ function draw(){
           frameRate(2);
           colorMode(RGB, 255);
           background(255);
-          textSize(78);
+          textSize(70);
           textFont(oldNewsFont);
           fill(0);
           noStroke();
