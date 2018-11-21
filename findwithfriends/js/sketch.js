@@ -21,10 +21,33 @@ var test = ['A','P','J','X','E','I','C','O','W'];
 var counter = 0;
 var maxRadius; // Sets the radius of each circle according to canvas width
 var pr,pg,pb; // Random color of each player - var for the red blue green color channels
+var dataServer;
+var pubKey = 'pub-c-b44da511-8d9d-4d62-8ef9-cf94247b6dc5';
+var subKey = 'sub-c-a350389e-edad-11e8-b4c2-46cd67be4fbe';
+var channelName = 'FindWithFriends';
+var numConnections;
 
 function setup(){
      createCanvas(600,600);
+
      maxRadius = (width-border)/(totTx*2);
+
+     // Initialize pubnub
+     dataServer = new PubNub({
+          publish_key    : pubKey,
+          subscribe_key   : subKey,
+          ssl  : true // Enables a secure connection. Required of OCAD workspace
+     });
+
+     // Attach callbacks to the pubnub object to handle messages and connections
+     dataServer.addListener({
+          message: readIncoming,
+          presence: whoIsConnected
+     })
+     dataServer.subscribe({
+          channels: [channelName]
+     });
+
      // Create a grid of tiles using the Tile class
      for(var tx = 0; tx < totTx; tx++){
           for(var ty = 0; ty < totTy; ty++){
@@ -78,7 +101,7 @@ function Tile(x,y,r,g,b){
 
      this.display = function(){
           fill(this.r,this.g,this.b);
-          stroke(100);
+          noStroke();
           // draw a circle
           //rectMode(CENTER,CENTER);
           //rect(this.x, this.y, this.size, this.size);
@@ -89,13 +112,13 @@ function Tile(x,y,r,g,b){
      }
 
      // Check whether the circle has been clicked and change it's color
-     this.clickCheck = function(mx,my){
+     this.clickCheck = function(mx,my,r,g,b){
           var d = dist(this.x,this.y,mx,my);
           if(d < (maxRadius-1)){
                // Click is within the circle - change color
-               this.r = pr;
-               this.g = pg;
-               this.b = pb;
+               this.r = r;
+               this.g = g;
+               this.b = b;
           }
      }
 }
@@ -115,12 +138,42 @@ function Letter(letter,x,y){
      }
 }
 
-function mousePressed(){
+function mouseClicked(){
      // Check if mouse is inside the circle for each tiles
      for(var i = 0; i < tiles.length; i++){
-          tiles[i].clickCheck(mouseX,mouseY);
+          tiles[i].clickCheck(mouseX,mouseY,pr,pg,pb);
+     }
+
+     // Send data to the server to draw it on other screens
+     dataServer.publish({
+          channel: channelName,
+          message:
+               {
+                    x : mouseX,
+                    y : mouseY,
+                    r : pr,
+                    g : pg,
+                    b : pb
+               }
+     });
+}
+
+function readIncoming(inMessage){
+     console.log(inMessage);
+     if(inMessage.channel == channelName){
+          // Get click co-ords & player colors
+          var clickX = inMessage.message.x;
+          var clickY = inMessage.message.y;
+          var pR = inMessage.message.r;
+          var pG = inMessage.message.g;
+          var pB = inMessage.message.b;
+          for (var i = 0; i < tiles.length; i++){
+               tiles[i].clickCheck(clickX,clickY,pR,pG,pB);
+          }
      }
 }
+
+function whoIsConnected(connectionInfo){}
 
 /*
      REFERENCES
