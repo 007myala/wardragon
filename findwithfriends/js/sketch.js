@@ -1,7 +1,7 @@
 /*
      FIND WITH FRIENDS
      Dev: MARIa deniSE Yala
-     Ver: 1.2
+     Ver: 1.3
      Last Modified: 21 / 11 / 18
 
      Draws a matrix of clickable tiles
@@ -14,13 +14,22 @@
 var canvas;
 var tiles = []; // An array to hold the square tiles
 var letters = []; // A nested array to hold letters
-var totTx = 3; // Total number of tiles to create in the x direction
-var totTy = 3; // Total number of tiles to create in the y direction
+var totTx = 7; // Total number of tiles to create in the x direction
+var totTy = 7; // Total number of tiles to create in the y direction
 var border = 50;
-var test = ['A','P','J','X','E','I','C','O','W'];
+// var test = ['A','P','J','X','E','I','C','O','W']; // 3 x 3
+var test = ['U','G','D','J','R','E','X',
+            'W','X','S','U','N','C','N',
+            'C','Y','N','J','F','C','V',
+            'F','E','U','N','D','F','B',
+            'Y','G','E','B','I','S','O',
+            'U','G','E','I','N','O','N',
+            'M','X','Y','G','O','M','E']; // 7 x 7
 var counter = 0;
 var maxRadius; // Sets the radius of each circle according to canvas width
 var pr,pg,pb; // Random color of each player - var for the red blue green color channels
+var pid; // An id for the player
+var white = "255255255";
 var dataServer;
 var pubKey = 'pub-c-b44da511-8d9d-4d62-8ef9-cf94247b6dc5';
 var subKey = 'sub-c-a350389e-edad-11e8-b4c2-46cd67be4fbe';
@@ -67,11 +76,11 @@ function setup(){
           }
      }
 
-     // Generate a random color and assign to player
-     pr = random(255);
-     pg = random(255);
-     pb = random(255);
-
+     // Generate a random color between 0 - 255 and assign to player
+     pr = int(random(0,256));
+     pg = int(random(0,256));
+     pb = int(random(0,256));
+     pid = pr.toString() + pg.toString + pb.toString(); // white is 255255255
      frameRate(2);
 };
 
