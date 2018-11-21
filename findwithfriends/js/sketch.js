@@ -1,7 +1,7 @@
 /*
      FIND WITH FRIENDS
      Dev: MARIa deniSE Yala
-     Ver: 1.0
+     Ver: 1.1
      Last Modified: 21 / 11 / 18
 
      Draws a matrix of clickable tiles
@@ -19,16 +19,18 @@ var totTy = 3; // Total number of tiles to create in the y direction
 var border = 50;
 var test = ['A','P','J','X','E','I','C','O','W'];
 var counter = 0;
-var pcolor; // a random color for the player
+var maxRadius; // Sets the radius of each circle according to canvas width
+var pr,pg,pb; // Random color of each player - var for the red blue green color channels
 
 function setup(){
      createCanvas(600,600);
+     maxRadius = (width-border)/(totTx*2);
      // Create a grid of tiles using the Tile class
      for(var tx = 0; tx < totTx; tx++){
           for(var ty = 0; ty < totTy; ty++){
                // Map function
                /* val to map, min, max, min val to map to, max val to map to*/
-               tiles.push(new Tile(map(tx,0,totTx,border,width-border), map(ty,0,totTy,border,height-border)));
+               tiles.push(new Tile(map(tx,0,totTx,border,width-border), map(ty,0,totTy,border,height-border),255,255,255));
           }
      }
 
@@ -41,6 +43,12 @@ function setup(){
                counter++;
           }
      }
+
+     // Generate a random color and assign to player
+     pr = random(255);
+     pg = random(255);
+     pb = random(255);
+
      frameRate(2);
 };
 
@@ -60,13 +68,16 @@ function draw(){
      }
 };
 
-function Tile(x,y){
+function Tile(x,y,r,g,b){
      this.x = x;
      this.y = y;
      this.size = 100; // width / height 100 x 100 dimensions
+     this.r = r;
+     this.g = g;
+     this.b = b;
 
      this.display = function(){
-          fill(255);
+          fill(this.r,this.g,this.b);
           stroke(100);
           // draw a circle
           //rectMode(CENTER,CENTER);
@@ -75,6 +86,17 @@ function Tile(x,y){
           //console.log(this.x);
           //console.log(this.y);
           //console.log("");
+     }
+
+     // Check whether the circle has been clicked and change it's color
+     this.clickCheck = function(mx,my){
+          var d = dist(this.x,this.y,mx,my);
+          if(d < (maxRadius-1)){
+               // Click is within the circle - change color
+               this.r = pr;
+               this.g = pg;
+               this.b = pb;
+          }
      }
 }
 
@@ -92,3 +114,18 @@ function Letter(letter,x,y){
           text(this.letter, this.x, this.y);
      }
 }
+
+function mousePressed(){
+     // Check if mouse is inside the circle for each tiles
+     for(var i = 0; i < tiles.length; i++){
+          tiles[i].clickCheck(mouseX,mouseY);
+     }
+}
+
+/*
+     REFERENCES
+     https://github.com/DigitalFuturesOCADU/CC18/blob/master/Experiment%204/P5/pubnub/06A_LOCAL_ONLYcommonCanvas_animSpeed_inertia/sketch.js
+     https://randomcolor.lllllllllllllllll.com/
+     http://nikolay.rocks/2015-10-29-rainbows-generator-in-javascript
+     https://p5js.org/examples/color-color-variables.html
+*/
