@@ -1,11 +1,11 @@
 /*
      FIND WITH FRIENDS
      Dev: MARIa deniSE Yala
-     Ver: 1.1
+     Ver: 1.2
      Last Modified: 21 / 11 / 18
 
      Draws a matrix of clickable tiles
-     onto the canvas
+     onto the canvas, changes their colors based on a player
 
      This code was created with help/reference from examples by Nick Puckett & Kate Hartman
      from the Creation & Computation - Digital Futures, OCAD University
@@ -138,7 +138,7 @@ function Letter(letter,x,y){
      }
 }
 
-function mouseClicked(){
+function mousePressed(){
      // Check if mouse is inside the circle for each tiles
      for(var i = 0; i < tiles.length; i++){
           tiles[i].clickCheck(mouseX,mouseY,pr,pg,pb);
@@ -161,7 +161,7 @@ function mouseClicked(){
 function readIncoming(inMessage){
      console.log(inMessage);
      if(inMessage.channel == channelName){
-          // Get click co-ords & player colors
+          // Get click coords & player colors
           var clickX = inMessage.message.x;
           var clickY = inMessage.message.y;
           var pR = inMessage.message.r;
