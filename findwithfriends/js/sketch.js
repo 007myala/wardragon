@@ -1,11 +1,11 @@
 /*
      FIND WITH FRIENDS
      Dev: MARIa deniSE Yala
-     Ver: 1.3
-     Last Modified: 21 / 11 / 18
+     Ver: 1.4
+     Last Modified: 22 / 11 / 18
 
      Draws a matrix of clickable tiles
-     onto the canvas, changes their colors based on a player
+     onto the canvas, changes their colors based on a player id
 
      This code was created with help/reference from examples by Nick Puckett & Kate Hartman
      from the Creation & Computation - Digital Futures, OCAD University
@@ -36,6 +36,7 @@ var pubKey = 'pub-c-b44da511-8d9d-4d62-8ef9-cf94247b6dc5';
 var subKey = 'sub-c-a350389e-edad-11e8-b4c2-46cd67be4fbe';
 var channelName = 'FindWithFriends';
 var numConnections;
+var isUndo = false;
 
 function setup(){
      createCanvas(600,600);
@@ -86,7 +87,6 @@ function setup(){
      pb = int(random(0,256));
      pid = pr.toString() + pg.toString() + pb.toString(); // white is 255255255
      console.log("Player ID: " + pid);
-     frameRate(2);
 };
 
 function draw(){
@@ -119,50 +119,40 @@ function Tile(x,y,r,g,b,c,l,w){
      this.display = function(){
           fill(this.r,this.g,this.b);
           noStroke();
-          // draw a circle
+          // draw a square tile
           rectMode(CENTER);
           rect(this.x, this.y, this.size, this.size);
-          //ellipse(this.x, this.y, this.size, this.size);
           //console.log(this.x);
           //console.log(this.y);
           //console.log("");
      }
 
-     // Check whether the circle has been clicked and change it's color
      this.clickCheck = function(mx,my,r,g,b){
           var d = dist(this.x,this.y,mx,my);
           if(d < (maxRadius-1)){
-               // Click is within the circle - check if it's white
-               if(this.isWhite){
-                    // Make tile the player's color
-                    console.log("Tile is white");
-                    this.r = r;
-                    this.g = g;
-                    this.b = b;
-                    // Color changed - update this isWhite
-                    this.isWhite = false;
+               // Click is within the circle - change color
+               this.r = r;
+               this.g = g;
+               this.b = b;
+               // Update the tile's color
+               this.c = r.toString() + g.toString() + b.toString();
+               console.log("Tile is now " + this.c);
+          }
+     }
+
+     this.undoCheck = function(mx,my,r,g,b){
+          var d = dist(this.x,this.y,mx,my);
+          if(d < (maxRadius-1)){
+               var tileColor = this.c;
+               var clickColor = r.toString() + g.toString() + b.toString();
+               if(tileColor == clickColor){
+                    // This is an undo click
+                    isUndo = true;
+                    console.log("Setting isUndo to true");
                } else {
-                    // Tile is not white - already clicked
-                    console.log("Tile's not white!");
-                    // Check if tile is locked
-                    if(this.isLocked){
-                         // Color can't be changed
-                         console.log("Tile is locked!");
-                    } else {
-                         // Tile hasn't been locked
-                         // Who's clicking? compare color ids - If same player is clicking make it white else switch to other player
-                         if(pid == who){
-                              /* this.r = 255;
-                              this.g = 255;
-                              this.b = 255;
-                              this.isWhite = true;*/
-                         } else {
-                              this.r = r;
-                              this.g = g;
-                              this.b = b;
-                              console.log("Friend is stealing tile!");
-                         }
-                    }
+                    // This is a normal click
+                    isUndo = false;
+                    console.log("Setting isUndo to false");
                }
           }
      }
@@ -184,24 +174,44 @@ function Letter(letter,x,y){
 }
 
 function mouseClicked(){
-     // Check if mouse is inside the circle for each tiles
+     // Check if the click was an undo click by comparing tile color to player color
      for(var i = 0; i < tiles.length; i++){
-          tiles[i].clickCheck(mouseX,mouseY,pr,pg,pb);
+          tiles[i].undoCheck(mouseX,mouseY,pr,pg,pb);
      }
 
      // Send data to the server to draw it on other screens
-     dataServer.publish({
-          channel: channelName,
-          message:
-               {
-                    x : mouseX,
-                    y : mouseY,
-                    r : pr,
-                    g : pg,
-                    b : pb,
-                    id : pid
-               }
-     });
+     if(isUndo){
+          console.log("Undo!");
+          // Tile needs to be white
+          dataServer.publish({
+               channel: channelName,
+               message:
+                    {
+                         x : mouseX,
+                         y : mouseY,
+                         r : 255,
+                         g : 255,
+                         b : 255,
+                         id : pid
+                    }
+          });
+          // Reset isUndo after the undo is registered
+          isUndo = false;
+     } else {
+          console.log("Normal click");
+          dataServer.publish({
+               channel: channelName,
+               message:
+                    {
+                         x : mouseX,
+                         y : mouseY,
+                         r : pr,
+                         g : pg,
+                         b : pb,
+                         id : pid
+                    }
+          });
+     }
 }
 
 function readIncoming(inMessage){
