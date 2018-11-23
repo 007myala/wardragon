@@ -29,6 +29,7 @@ var counter = 0;
 var maxRadius; // Sets the radius of each circle according to canvas width
 var pr,pg,pb; // Random color of each player - var for the red blue green color channels
 var pid; // An id for the player
+var who; // A var to hold who is clicking
 var white = "255255255";
 var dataServer;
 var pubKey = 'pub-c-b44da511-8d9d-4d62-8ef9-cf94247b6dc5';
@@ -60,9 +61,12 @@ function setup(){
      // Create a grid of tiles using the Tile class
      for(var tx = 0; tx < totTx; tx++){
           for(var ty = 0; ty < totTy; ty++){
-               // Map function
-               /* val to map, min, max, min val to map to, max val to map to*/
-               tiles.push(new Tile(map(tx,0,totTx,border,width-border), map(ty,0,totTy,border,height-border),255,255,255));
+               // Map function - val to map, min, max, min val to map to, max val to map to
+               // Pass the color white rgb vals and also color id
+               // New tile so set isLocked to false, set isWhite to true
+               tiles.push(new Tile(map(tx,0,totTx,border,width-border),
+                                   map(ty,0,totTy,border,height-border),
+                                   255,255,255,white,false,true));
           }
      }
 
@@ -80,7 +84,8 @@ function setup(){
      pr = int(random(0,256));
      pg = int(random(0,256));
      pb = int(random(0,256));
-     pid = pr.toString() + pg.toString + pb.toString(); // white is 255255255
+     pid = pr.toString() + pg.toString() + pb.toString(); // white is 255255255
+     console.log("Player ID: " + pid);
      frameRate(2);
 };
 
@@ -100,21 +105,24 @@ function draw(){
      }
 };
 
-function Tile(x,y,r,g,b){
+function Tile(x,y,r,g,b,c,l,w){
      this.x = x;
      this.y = y;
-     this.size = 100; // width / height 100 x 100 dimensions
+     this.size = 80; // width / height 100 x 100 dimensions
      this.r = r;
      this.g = g;
      this.b = b;
+     this.c = c; // A string for the color as id
+     this.isLocked = l;
+     this.isWhite = w;
 
      this.display = function(){
           fill(this.r,this.g,this.b);
           noStroke();
           // draw a circle
-          //rectMode(CENTER,CENTER);
-          //rect(this.x, this.y, this.size, this.size);
-          ellipse(this.x, this.y, this.size, this.size);
+          rectMode(CENTER);
+          rect(this.x, this.y, this.size, this.size);
+          //ellipse(this.x, this.y, this.size, this.size);
           //console.log(this.x);
           //console.log(this.y);
           //console.log("");
@@ -124,10 +132,38 @@ function Tile(x,y,r,g,b){
      this.clickCheck = function(mx,my,r,g,b){
           var d = dist(this.x,this.y,mx,my);
           if(d < (maxRadius-1)){
-               // Click is within the circle - change color
-               this.r = r;
-               this.g = g;
-               this.b = b;
+               // Click is within the circle - check if it's white
+               if(this.isWhite){
+                    // Make tile the player's color
+                    console.log("Tile is white");
+                    this.r = r;
+                    this.g = g;
+                    this.b = b;
+                    // Color changed - update this isWhite
+                    this.isWhite = false;
+               } else {
+                    // Tile is not white - already clicked
+                    console.log("Tile's not white!");
+                    // Check if tile is locked
+                    if(this.isLocked){
+                         // Color can't be changed
+                         console.log("Tile is locked!");
+                    } else {
+                         // Tile hasn't been locked
+                         // Who's clicking? compare color ids - If same player is clicking make it white else switch to other player
+                         if(pid == who){
+                              /* this.r = 255;
+                              this.g = 255;
+                              this.b = 255;
+                              this.isWhite = true;*/
+                         } else {
+                              this.r = r;
+                              this.g = g;
+                              this.b = b;
+                              console.log("Friend is stealing tile!");
+                         }
+                    }
+               }
           }
      }
 }
@@ -147,7 +183,7 @@ function Letter(letter,x,y){
      }
 }
 
-function mousePressed(){
+function mouseClicked(){
      // Check if mouse is inside the circle for each tiles
      for(var i = 0; i < tiles.length; i++){
           tiles[i].clickCheck(mouseX,mouseY,pr,pg,pb);
@@ -162,7 +198,8 @@ function mousePressed(){
                     y : mouseY,
                     r : pr,
                     g : pg,
-                    b : pb
+                    b : pb,
+                    id : pid
                }
      });
 }
@@ -176,6 +213,8 @@ function readIncoming(inMessage){
           var pR = inMessage.message.r;
           var pG = inMessage.message.g;
           var pB = inMessage.message.b;
+          // Update who is clicking
+          who = inMessage.message.id;
           for (var i = 0; i < tiles.length; i++){
                tiles[i].clickCheck(clickX,clickY,pR,pG,pB);
           }
