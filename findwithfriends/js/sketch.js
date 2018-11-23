@@ -1,12 +1,12 @@
 /*
      FIND WITH FRIENDS
      Dev: MARIa deniSE Yala
-     Ver: 1.5
+     Ver: 1.6
      Last Modified: 23 / 11 / 18
 
      Draws a matrix of clickable tiles
      onto the canvas, changes their colors based on a player id
-     allows players to 'steal' each others tiles or 'lock' their tiles 
+     allows players to 'steal' each others tiles or 'lock' their tiles
 
      This code was created with help/reference from examples by Nick Puckett & Kate Hartman
      from the Creation & Computation - Digital Futures, OCAD University
@@ -15,17 +15,32 @@
 var canvas;
 var tiles = []; // An array to hold the square tiles
 var letters = []; // A nested array to hold letters
-var totTx = 7; // Total number of tiles to create in the x direction
-var totTy = 7; // Total number of tiles to create in the y direction
-var border = 50;
+var totTx = 15; // Total number of tiles to create in the x direction
+var totTy = 15; // Total number of tiles to create in the y direction
+var border = 30;
 // var test = ['A','P','J','X','E','I','C','O','W']; // 3 x 3
-var test = ['U','G','D','J','R','E','X',
+/* var test = ['U','G','D','J','R','E','X',
             'W','X','S','U','N','C','N',
             'C','Y','N','J','F','C','V',
             'F','E','U','N','D','F','B',
             'Y','G','E','B','I','S','O',
             'U','G','E','I','N','O','N',
-            'M','X','Y','G','O','M','E']; // 7 x 7
+            'M','X','Y','G','O','M','E']; // 7 x 7 */
+var whoHasTrumpOffended = ['K','M','S','H','I','S','T','O','R','I','A','N','S','O','A',
+                           'D','E','L','B','A','S','I','D','K','D','K','W','S','H','L',
+                           'R','X','B','M','V','A','F','U','Y','U','F','P','Z','S','J',
+                           'R','Z','U','E','S','Z','D','A','F','L','Y','R','H','C','C',
+                           'E','X','S','X','T','W','L','C','F','G','R','E','U','I','S',
+                           'A','O','M','I','N','P','O','Y','A','B','A','S','M','E','U',
+                           'G','T','I','C','A','S','M','M','M','T','T','S','A','N','H',
+                           'A','L','L','A','R','R','K','E','E','D','I','A','N','T','C',
+                           'N','F','S','N','G','K','R','C','U','N','L','Z','I','I','X',
+                           'I','E','U','S','I','T','O','F','A','Y','I','V','T','S','J',
+                           'T','N','M','Y','M','A','R','M','B','L','M','A','Y','T','O',
+                           'E','G','H','R','M','S','L','C','Q','O','B','P','V','S','V',
+                           'S','W','X','W','I','D','A','Y','P','W','D','E','R','L','H',
+                           'U','T','O','U','V','I','P','O','V','K','X','W','H','Q','J',
+                           'O','B','N','M','A','U','F','Y','Z','Q','R','N','T','T','X']; // 15 X 15
 var counter = 0;
 var maxRadius; // Sets the radius of each circle according to canvas width
 var pr,pg,pb; // Random color of each player - var for the red blue green color channels
@@ -42,9 +57,12 @@ var lockButton;
 var lockPressed = false;
 
 function setup(){
-     createCanvas(600,600);
+     canvas = createCanvas(windowWidth, windowHeight);
+     canvas.style('display','block');
 
-     maxRadius = (width-border)/(totTx*2);
+     gwidth = 650;
+     gheight = 650;
+     maxRadius = (gwidth-border)/(totTx*2);
 
      // Initialize pubnub
      dataServer = new PubNub({
@@ -68,8 +86,8 @@ function setup(){
                // Map function - val to map, min, max, min val to map to, max val to map to
                // Pass the color white rgb vals and also color id
                // New tile so set isLocked to false, set isWhite to true
-               tiles.push(new Tile(map(tx,0,totTx,border,width-border),
-                                   map(ty,0,totTy,border,height-border),
+               tiles.push(new Tile(map(tx,0,totTx,border,gwidth-border),
+                                   map(ty,0,totTy,border,gheight-border),
                                    255,255,255,white,false,true));
           }
      }
@@ -78,8 +96,10 @@ function setup(){
      for(var x = 0; x < totTx; x++){
           letters[x] = []; // creating a nested array
           for(var y = 0; y < totTy; y++){
-               var l = test[counter];
-               letters[x][y] = new Letter(l,map(x,0,totTx,border,width-border), map(y,0,totTy,border,height-border));
+               var l = whoHasTrumpOffended[counter];
+               letters[x][y] = new Letter(l,
+                                          map(x,0,totTx,border,gwidth-border),
+                                          map(y,0,totTy,border,gheight-border));
                counter++;
           }
      }
@@ -92,8 +112,10 @@ function setup(){
      console.log("Player ID: " + pid);
 
      // Draw the lock button
+     var iW = 660;
+     var iH = 400;
      lockButton = createButton('Lock Tiles');
-     lockButton.position(300,550);
+     lockButton.position(iW,iH);
      lockButton.mousePressed(lock);
 };
 
@@ -111,13 +133,36 @@ function draw(){
                letters[x][y].display(); // Get a letter and display it
           }
      }
+
+     // Draw the hints
+     fill(255,0,0);
+     textSize(20);
+     text("FindWithFriends", 700, 25);
+     textSize(12);
+     text("Who Has Trump Offended?", 700, 60);
+     textSize(8);
+     text("Source - HuffingtonPost", 700, 75);
+     fill(255);
+     textSize(12);
+     text("HISTORIANS", 700,100);
+     text("DISABLED", 700,125);
+     text("WOMEN", 700,150);
+     text("SCIENTISTS", 700,175);
+     text("LGBT",700,200);
+     text("MEXICANS",700,225);
+     text("'THE BLACKS'",700,250);
+     text("IMMIGRANTS",700,275);
+     text("PRESS",700,300);
+     text("MUSLIMS",700,325);
+     text("REAGANITES",700,350);
+     text("*SUPER SECRET WORD*",700,375);
 };
 
 /* Tile class */
 function Tile(x,y,r,g,b,c,l,w){
      this.x = x;
      this.y = y;
-     this.size = 80; // width / height 100 x 100 dimensions
+     this.size = 40; // width / height
      this.r = r;
      this.g = g;
      this.b = b;
@@ -128,6 +173,7 @@ function Tile(x,y,r,g,b,c,l,w){
      this.display = function(){
           fill(this.r,this.g,this.b);
           noStroke();
+          //stroke(0);
           // draw a square tile
           rectMode(CENTER);
           rect(this.x, this.y, this.size, this.size);
@@ -243,7 +289,7 @@ function Letter(letter,x,y){
           // draw the letter
           fill(0);
           noStroke();
-          textSize(25);
+          textSize(12);
           textAlign(CENTER,CENTER);
           text(this.letter, this.x, this.y);
      }
@@ -332,6 +378,11 @@ function readIncoming(inMessage){
 }
 
 function whoIsConnected(connectionInfo){}
+
+/* Function to make the canvas responsive to the screen */
+function windowResized(){
+     resizeCanvas(windowWidth, windowHeight);
+}
 
 /*
      REFERENCES
