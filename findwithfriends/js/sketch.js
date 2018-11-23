@@ -1,11 +1,12 @@
 /*
      FIND WITH FRIENDS
      Dev: MARIa deniSE Yala
-     Ver: 1.4
-     Last Modified: 22 / 11 / 18
+     Ver: 1.5
+     Last Modified: 23 / 11 / 18
 
      Draws a matrix of clickable tiles
      onto the canvas, changes their colors based on a player id
+     allows players to 'steal' each others tiles or 'lock' their tiles 
 
      This code was created with help/reference from examples by Nick Puckett & Kate Hartman
      from the Creation & Computation - Digital Futures, OCAD University
@@ -37,6 +38,8 @@ var subKey = 'sub-c-a350389e-edad-11e8-b4c2-46cd67be4fbe';
 var channelName = 'FindWithFriends';
 var numConnections;
 var isUndo = false;
+var lockButton;
+var lockPressed = false;
 
 function setup(){
      createCanvas(600,600);
@@ -87,6 +90,11 @@ function setup(){
      pb = int(random(0,256));
      pid = pr.toString() + pg.toString() + pb.toString(); // white is 255255255
      console.log("Player ID: " + pid);
+
+     // Draw the lock button
+     lockButton = createButton('Lock Tiles');
+     lockButton.position(300,550);
+     lockButton.mousePressed(lock);
 };
 
 function draw(){
@@ -105,6 +113,7 @@ function draw(){
      }
 };
 
+/* Tile class */
 function Tile(x,y,r,g,b,c,l,w){
      this.x = x;
      this.y = y;
@@ -130,34 +139,101 @@ function Tile(x,y,r,g,b,c,l,w){
      this.clickCheck = function(mx,my,r,g,b){
           var d = dist(this.x,this.y,mx,my);
           if(d < (maxRadius-1)){
-               // Click is within the circle - change color
-               this.r = r;
-               this.g = g;
-               this.b = b;
-               // Update the tile's color
-               this.c = r.toString() + g.toString() + b.toString();
-               console.log("Tile is now " + this.c);
+               // Click is within the circle - check if unlocked to change color
+               if(this.isLocked){
+                    // Can't change color, tile is locked
+               } else {
+                    this.r = r;
+                    this.g = g;
+                    this.b = b;
+                    // Update the tile's color
+                    this.c = r.toString() + g.toString() + b.toString();
+                    console.log("Tile is now " + this.c);
+               }
           }
      }
 
      this.undoCheck = function(mx,my,r,g,b){
           var d = dist(this.x,this.y,mx,my);
           if(d < (maxRadius-1)){
-               var tileColor = this.c;
-               var clickColor = r.toString() + g.toString() + b.toString();
-               if(tileColor == clickColor){
-                    // This is an undo click
-                    isUndo = true;
-                    console.log("Setting isUndo to true");
+               if(this.isLocked){
+                    // Can't change color, tile is locked
                } else {
-                    // This is a normal click
-                    isUndo = false;
-                    console.log("Setting isUndo to false");
+                    var tileColor = this.c;
+                    var clickColor = r.toString() + g.toString() + b.toString();
+                    if(tileColor == clickColor){
+                         // This is an undo click
+                         isUndo = true;
+                         console.log("Setting isUndo to true");
+                    } else {
+                         // This is a normal click
+                         isUndo = false;
+                         console.log("Setting isUndo to false");
+                    }
                }
+          }
+     }
+
+     /* Lock all of a players tiles to prevent stealing */
+     this.lockTile = function(id){
+          // If player's id color matches the tiles id color, lock it
+          if(this.c == id){
+               this.isLocked = true;
+               // Send a message to update other player's screens.
+               console.log("Updating lock");
+               pubLock(this.x, this.y, this.r, this.g, this.b, 1);
+          } else {
+               this.isLocked = false;
+          }
+     }
+
+     /* Lock all of a players tiles to prevent stealing */
+     this.updateLockTile = function(id){
+          // If player's id color matches the tiles id color, lock it
+          if(this.c == id){
+               this.isLocked = true;
+               console.log("Color match");
+               console.log("color : " + this.c + " ID: " + id );
+          } else {
+               this.isLocked = false;
           }
      }
 }
 
+/* Function to pass the player color to the tile's lock function */
+function lock(){
+     lockPressed = true;
+     for(var i = 0; i < tiles.length; i++){
+          tiles[i].lockTile(pid);
+     }
+}
+
+/* Function to update the locked tiles */
+function updateLock(p){
+     lockPressed = true;
+     for(var i = 0; i < tiles.length; i++){
+          tiles[i].updateLockTile(p);
+     }
+}
+
+/* Function to publish a message indicating a lock has occured */
+function pubLock(lx,ly,lr,lg,lb,lId){
+     dataServer.publish({
+          channel: channelName,
+          message:
+               {
+                    x : lx,
+                    y : ly,
+                    r : lr,
+                    g : lg,
+                    b : lb,
+                    id : pid,
+                    l : lId
+               }
+     });
+}
+
+/* Letter class */
 function Letter(letter,x,y){
      this.letter = letter;
      this.x = x;
@@ -173,47 +249,59 @@ function Letter(letter,x,y){
      }
 }
 
-function mouseClicked(){
-     // Check if the click was an undo click by comparing tile color to player color
-     for(var i = 0; i < tiles.length; i++){
-          tiles[i].undoCheck(mouseX,mouseY,pr,pg,pb);
-     }
-
-     // Send data to the server to draw it on other screens
-     if(isUndo){
-          console.log("Undo!");
-          // Tile needs to be white
-          dataServer.publish({
-               channel: channelName,
-               message:
-                    {
-                         x : mouseX,
-                         y : mouseY,
-                         r : 255,
-                         g : 255,
-                         b : 255,
-                         id : pid
-                    }
-          });
-          // Reset isUndo after the undo is registered
-          isUndo = false;
+function mousePressed(){
+     // Check whether the lock button has been clicked
+     if(lockPressed){
+          console.log("Lock has been pressed");
+          // Reset the lockPressed
+          lockPressed = false;
      } else {
-          console.log("Normal click");
-          dataServer.publish({
-               channel: channelName,
-               message:
-                    {
-                         x : mouseX,
-                         y : mouseY,
-                         r : pr,
-                         g : pg,
-                         b : pb,
-                         id : pid
-                    }
-          });
+          console.log("Lock not pressed");
+          // Check if the click was an undo click by comparing tile color to player color
+          for(var i = 0; i < tiles.length; i++){
+               tiles[i].undoCheck(mouseX,mouseY,pr,pg,pb);
+          }
+
+          // Send data to the server to draw it on other screens
+          // Check whether it is an undo click
+          if(isUndo){
+               console.log("Undo!");
+               // Tile needs to be white
+               dataServer.publish({
+                    channel: channelName,
+                    message:
+                         {
+                              x : mouseX,
+                              y : mouseY,
+                              r : 255,
+                              g : 255,
+                              b : 255,
+                              id : pid,
+                              l : 0
+                         }
+               });
+               // Reset isUndo after the undo is registered
+               isUndo = false;
+          } else {
+               console.log("Normal click");
+               dataServer.publish({
+                    channel: channelName,
+                    message:
+                         {
+                              x : mouseX,
+                              y : mouseY,
+                              r : pr,
+                              g : pg,
+                              b : pb,
+                              id : pid,
+                              l : 0
+                         }
+               });
+          }
      }
 }
 
+/* Function reads incoming messages - determines whether it is normal click or a lock message */
 function readIncoming(inMessage){
      console.log(inMessage);
      if(inMessage.channel == channelName){
@@ -225,8 +313,20 @@ function readIncoming(inMessage){
           var pB = inMessage.message.b;
           // Update who is clicking
           who = inMessage.message.id;
-          for (var i = 0; i < tiles.length; i++){
-               tiles[i].clickCheck(clickX,clickY,pR,pG,pB);
+
+          var lId = inMessage.message.l;
+          if(lId == 0){
+               // Not an lock message
+               console.log("Not a lock message");
+               for (var i = 0; i < tiles.length; i++){
+                    tiles[i].clickCheck(clickX,clickY,pR,pG,pB);
+               }
+          } else if(lId == 1){
+               // A lock message
+               console.log("Lock tiles for ID " + who);
+               updateLock(who);
+          } else {
+               console.log("Something wrong with lock id. Not 0 not 1");
           }
      }
 }
