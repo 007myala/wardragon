@@ -59,6 +59,7 @@ var lockPressed = false;
 function setup(){
      canvas = createCanvas(windowWidth, windowHeight);
      canvas.style('display','block');
+     canvas.parent('mcontainer'); // In html file
 
      gwidth = 650;
      gheight = 650;
@@ -112,11 +113,13 @@ function setup(){
      console.log("Player ID: " + pid);
 
      // Draw the lock button
-     var iW = 660;
+     var iW = 630;
      var iH = 400;
-     lockButton = createButton('Lock Tiles');
+     lockButton = createButton('LOCK TILES');
      lockButton.position(iW,iH);
      lockButton.mousePressed(lock);
+     lockButton.parent('mcontainer');
+     lockButton.id('lockBtn');
 };
 
 function draw(){
