@@ -58,7 +58,7 @@ var ptiles = [ 0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,
                1,0,0,0,2,0,0,0,0,0,0,3,0,0,0,
                0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,
                0,0,0,0,0,0,0,0,0,0,0,0,0,3,0]; // 15 X 15
-
+var players = []; // array of players
 var counter = 0;
 var pcounter = 0;
 var score = 0;
@@ -136,7 +136,7 @@ function setup(){
      // console.log("Player ID: " + pid);
 
      // Draw the lock button
-     var iW = 630;
+     var iW = 650;
      var iH = 400;
      lockButton = createButton('LOCK TILES');
      lockButton.position(iW,iH);
@@ -291,6 +291,7 @@ function lock(){
      for(var i = 0; i < tiles.length; i++){
           tiles[i].lockTile(pid);
      }
+     // Score updated - update other players
 }
 
 /* Function to update the locked tiles */
