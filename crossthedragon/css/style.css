@@ -1,0 +1,10 @@
+body {
+     margin: 0;
+     padding: 0;
+}
+
+#lockBtn {
+     padding: 20px;
+     font-weight: bold;
+     letter-spacing: 2px;
+}
