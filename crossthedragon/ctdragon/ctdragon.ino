@@ -54,6 +54,6 @@ void loop() {
     Serial.println(); // print a newline character to the serial port to distinguish between objects
 
     lastSend = millis();
-    // delay(500);
+    delay(2000);
   }
 }

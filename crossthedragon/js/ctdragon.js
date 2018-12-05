@@ -17,10 +17,23 @@ var channelName = 'CrossWithFriends';
 var title = "CROSS THE DRAGON";
 var currIndustry = "CROSS THE DRAGON";
 
+// Videos
+var vid1;
+var vid2;
+
+// States
+var state1 = false; // Project no video
+var state2 = false; // Project video 1
+var state3 = false; // Project video 2
+var isPlaying = false;
+
+function preload(){
+     vid1 = createVideo('../crossthedragon/video/Boat.mp4');
+     vid2 = createVideo('../crossthedragon/video/Boat_13.mp4');
+}
+
 function setup(){
-     canvas = createCanvas(windowWidth, windowHeight);
-     canvas.style('display','block');
-     canvas.parent('mcontainer'); // In html file
+     canvas = createCanvas(0,0);
 
      serial = new p5.SerialPort(); // Create a serial port object
      serial.open(serialPortName); // Open the serial port
@@ -42,9 +55,14 @@ function setup(){
      dataServer.subscribe({
           channels: [channelName]
      });
+
+     vid1.parent('vcontainer');
+     vid1.id('myvid');
+     // vid1.loop();
 }
 
 function draw(){
+     /* // Testing the ON/OFF functionality
      if(touchSensorsON){
           background(255);
           fill(0);
@@ -55,7 +73,7 @@ function draw(){
      textSize("60");
      textAlign(CENTER,CENTER);
      textSize(50);
-     text(currIndustry, width/2, height/2);
+     text(currIndustry, width/2, height/2); */
 }
 
 function readIncoming(inMessage){
@@ -66,7 +84,7 @@ function readIncoming(inMessage){
           // console.log(inMessage.message);
           if(mId == 2){
                currIndustry = inMessage.message.ind;
-               console.log("Current industry is " + currIndustry);
+               //console.log("Current industry is " + currIndustry);
           } else {
                // console.log("Not the video 1 category message");
           }
@@ -78,16 +96,13 @@ function whoIsConnected(connectionInfo){}
 /* Function called every time data is received from the serial port */
 function dataReceived(){
      var rawData = serial.readStringUntil('\r\n'); // Stop reading at newline
-     console.log(rawData);
-     print("Getting this " + rawData);
+     //console.log(rawData);
+     //print("Getting this " + rawData);
      if(rawData.length > 1){
           // Check that data is being received
           sensorIndicator = JSON.parse(rawData).s1;
-          print("This is my reading");
-          print(sensorIndicator);
-          print("*");
      } else {
-          print('Not getting any sensor data');
+          //print('Not getting any sensor data');
      }
 
      if(sensorIndicator == 0){
@@ -97,8 +112,26 @@ function dataReceived(){
           touchSensorsON = true;
           print("Sensors are ON");
      } else {
-          print("Something went wrong check 's1' val sent by JSON");
-          print(JSON.parse(rawData).s1);
+          //print("Something went wrong check 's1' val sent by JSON");
+          //print(JSON.parse(rawData).s1);
+     }
+     makeProjections();
+}
+
+function makeProjections(){
+     if(touchSensorsON){
+          // Mat has been touched - start a projection
+          if(!isPlaying){
+               //vid2.pause();
+               vid1.play();
+               isPlaying = true;
+          } else {
+               vid1.pause();
+               //vid2.play();
+               isPlaying = false;
+          }
+     } else {
+          // Touch sensors are off - ignore
      }
 }
 
