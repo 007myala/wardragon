@@ -1,8 +1,14 @@
+/*
+     This file grabs the current industry found from the wordsearch
+     and displays it on the screen 
+*/
 var canvas;
+
+// PubNub
 var dataServer;
-var pubKey = 'pub-c-b44da511-8d9d-4d62-8ef9-cf94247b6dc5';
-var subKey = 'sub-c-a350389e-edad-11e8-b4c2-46cd67be4fbe';
-var channelName = 'FindWithFriends';
+var pubKey = 'pub-c-492eadd3-274a-4f66-bc2b-275f441475f0';
+var subKey = 'sub-c-f1fc1aa0-f805-11e8-aba4-3a82e8287a69';
+var channelName = 'CrossWithFriends';
 
 var title = "CROSS THE DRAGON";
 var currIndustry = "CROSS THE DRAGON";
@@ -34,6 +40,7 @@ function draw(){
      textSize("60");
      fill(255);
      textAlign(CENTER,CENTER);
+     textSize(50);
      text(currIndustry, width/2, height/2);
 }
 
@@ -41,8 +48,14 @@ function readIncoming(inMessage){
      // console.log(inMessage);
      if(inMessage.channel == channelName){
           // Get message id
-          var mId = inMessage.message.id;
-          var mInd = inMessage.message.ind;
+          var mId = inMessage.message.i;
+          // console.log(inMessage.message);
+          if(mId == 2){
+               currIndustry = inMessage.message.ind;
+               console.log("Current industry is " + currIndustry);
+          } else {
+               // console.log("Not the video 1 category message");
+          }
      }
 }
 

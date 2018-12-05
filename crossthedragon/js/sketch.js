@@ -7,6 +7,8 @@
      Cross the dragon - combines the interactions from Maria Yala's FindWithFriends
      & Alicia Blakey's Soundbeats & Heartbeats.
 
+     Gets a word found from the wordsearch and passes it to crossthedragon.js to trigger a video projection 
+
      This code was created with help/reference from examples by Nick Puckett & Kate Hartman
      from the Creation & Computation - Digital Futures, OCAD University
 */
@@ -29,6 +31,8 @@ var catT = 0;
 var catE = 0;
 var catR = 0;
 var catF = 0;
+var currIndustry = "";
+var shouldStartProjection = false;
 
 var crossWithFriends = ['O','B','T','R','A','N','S','P','O','R','T',
                         'Q','E','P','V','I','T','Y','R','S','D','O',
@@ -159,6 +163,10 @@ function draw(){
      }
 
      // Draw the hints
+     fill(0);
+     textSize(50);
+     textAlign(CENTER);
+     text(currIndustry,750,150);
 }
 
 /* Tile class */
@@ -195,14 +203,10 @@ function Tile(x,y,r,g,b,c,t,l,w,cat){
                     } else {
                          if(this.inPlay){
                               //console.log("In play");
-                              r = 255;
-                              g = 26;
-                              b = 26;
+                              r = 255; g = 26; b = 26;
                          } else {
                               //console.log("Not in play");
-                              r = 119;
-                              g = 136;
-                              b = 153;
+                              r = 119; g = 136; b = 153;
                          }
                     }
                     this.r = r;
@@ -240,7 +244,7 @@ function Tile(x,y,r,g,b,c,t,l,w,cat){
           if(this.inPlay){
                // Tile is locable - lock it
                // If it's color is red
-               console.log(" Your tile is " + this.c);
+               //console.log(" Your tile is " + this.c);
                if(this.c == "2552626"){
                     // Tile is red. Check tile category
                     var tileCat = this.category;
@@ -272,10 +276,54 @@ function discover(){
      for(var i = 0; i < tiles.length; i++){
           tiles[i].lockTile();
      }
-     console.log("Found this many T's : " + catT);
-     console.log("Found this many E's : " + catE);
-     console.log("Found this many R's : " + catR);
-     console.log("Found this many F's : " + catF);
+     //console.log("Found this many T's : " + catT);
+     //console.log("Found this many E's : " + catE);
+     //console.log("Found this many R's : " + catR);
+     //console.log("Found this many F's : " + catF);
+     checkIndustries();
+}
+
+/* Function to check which complete word has been found */
+function checkIndustries(){
+     if(catT == 9){
+          currIndustry = "Transport";
+          // Reset it
+          catT = 0;
+          shouldStartProjection = true;
+     } else if(catE == 6){
+          currIndustry = "Energy";
+          // Reset it
+          catE = 0;
+          shouldStartProjection = true;
+     } else if(catR == 10){
+          currIndustry = "Real Estate";
+          // Reset it
+          catR = 0;
+          shouldStartProjection = true;
+     } else if(catF == 7){
+          currIndustry = "Finance";
+          // Reset it
+          catF = 0;
+          shouldStartProjection = true;
+     } else {
+          currIndustry = "";
+          shouldStartProjection = false;
+     }
+     // Start the first projection?
+     if(shouldStartProjection){
+          dataServer.publish({
+               channel: channelName,
+               message:
+               {
+                    i: 2, // Message indicating click positon
+                    ind: currIndustry
+               }
+          });
+     }
+}
+
+function updateLock(){
+     lockPressed = true;
 }
 
 /* Letter class */
@@ -295,49 +343,57 @@ function Letter(letter,x,y){
 }
 
 function mousePressed(){
-     // Check if it was an undo click
-     for(var i = 0; i < tiles.length; i++){
-          tiles[i].undoCheck(mouseX,mouseY,pr,pg,pb);
-     }
-     // Send data to server to draw it on connected screens
-     // Check whether it is an undo click
-     if(isUndo){
-          console.log("Undo!");
-          // Tile needs to be white
-          dataServer.publish({
-               channel: channelName,
-               message:
-               {
-                    i: 1, // Message indicating click positon
-                    x: mouseX,
-                    y: mouseY,
-                    r: 255,
-                    g: 255,
-                    b: 255
-               }
-          });
-          // Reset isUndo after the undo is registered
-          isUndo = false;
+     // Check whether the lock button has been clicked
+     if(lockPressed){
+          // console.log("Lock has been pressed");
+          // Reset the lockPressed
+          lockPressed = false;
      } else {
-          //console.log("Normal click");
-          dataServer.publish({
-               channel: channelName,
-               message:
-               {
-                    i: 1, // Message indicating click positon
-                    x: mouseX,
-                    y: mouseY,
-                    r: pr,
-                    g: pg,
-                    b: pb
-               }
-          });
+          // Check if it was an undo click
+          for(var i = 0; i < tiles.length; i++){
+               tiles[i].undoCheck(mouseX,mouseY,pr,pg,pb);
+          }
+
+          // Send data to server to draw it on connected screens
+          // Check whether it is an undo click
+          if(isUndo){
+               // console.log("Undo!");
+               // Tile needs to be white
+               dataServer.publish({
+                    channel: channelName,
+                    message:
+                    {
+                         i: 1, // Message indicating click positon
+                         x: mouseX,
+                         y: mouseY,
+                         r: 255,
+                         g: 255,
+                         b: 255
+                    }
+               });
+               // Reset isUndo after the undo is registered
+               isUndo = false;
+          } else {
+               //console.log("Normal click");
+               dataServer.publish({
+                    channel: channelName,
+                    message:
+                    {
+                         i: 1, // Message indicating click positon
+                         x: mouseX,
+                         y: mouseY,
+                         r: pr,
+                         g: pg,
+                         b: pb
+                    }
+               });
+          }
      }
 }
 
 /* Function reads incoming messages */
 function readIncoming(inMessage){
-     console.log(inMessage);
+     // console.log(inMessage);
      if(inMessage.channel == channelName){
           // Check what type of message it is
           var msgId = inMessage.message.i;
@@ -354,7 +410,11 @@ function readIncoming(inMessage){
                     tiles[i].clickCheck(clickX,clickY, pR,pG,pB);
                }
           } else if(msgId == 2){
-               // Launch video projection message
+               // A lock message
+               updateLock();
+               // Start the projection
+               var projIndustry = inMessage.message.ind;
+               console.log("Will start playing the video 1 for " + projIndustry);
           } else {
                //console.log("Oops! Check message id.");
           }
