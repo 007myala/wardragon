@@ -1,8 +1,12 @@
 /*
      This file grabs the current industry found from the wordsearch
-     and displays it on the screen 
+     and displays it on the screen
 */
 var canvas;
+var serial; // serial port object
+var sensorIndicator = 0;
+var serialPortName = "/dev/ttyUSB0"; // Set this to your port
+var touchSensorsON = false;
 
 // PubNub
 var dataServer;
@@ -17,6 +21,11 @@ function setup(){
      canvas = createCanvas(windowWidth, windowHeight);
      canvas.style('display','block');
      canvas.parent('mcontainer'); // In html file
+
+     serial = new p5.SerialPort(); // Create a serial port object
+     serial.open(serialPortName); // Open the serial port
+     serial.on('open', ardCon); // Open the socket connection
+     serial.on('data', dataReceived); // Execute the dataReceived function
 
      // Initialize pubnub
      dataServer = new PubNub({
@@ -36,9 +45,14 @@ function setup(){
 }
 
 function draw(){
-     background(0);
+     if(touchSensorsON){
+          background(255);
+          fill(0);
+     } else {
+          background(0);
+          fill(255);
+     }
      textSize("60");
-     fill(255);
      textAlign(CENTER,CENTER);
      textSize(50);
      text(currIndustry, width/2, height/2);
@@ -60,6 +74,39 @@ function readIncoming(inMessage){
 }
 
 function whoIsConnected(connectionInfo){}
+
+/* Function called every time data is received from the serial port */
+function dataReceived(){
+     var rawData = serial.readStringUntil('\r\n'); // Stop reading at newline
+     console.log(rawData);
+     print("Getting this " + rawData);
+     if(rawData.length > 1){
+          // Check that data is being received
+          sensorIndicator = JSON.parse(rawData).s1;
+          print("This is my reading");
+          print(sensorIndicator);
+          print("*");
+     } else {
+          print('Not getting any sensor data');
+     }
+
+     if(sensorIndicator == 0){
+          touchSensorsON = false;
+          print("Sensors are OFF");
+     } else if(sensorIndicator == 1) {
+          touchSensorsON = true;
+          print("Sensors are ON");
+     } else {
+          print("Something went wrong check 's1' val sent by JSON");
+          print(JSON.parse(rawData).s1);
+     }
+}
+
+/* Function to record arduino connection */
+function ardCon(){
+     console.log("Connected to the Arduino. LISTEN UP");
+}
+
 
 /* Function to make the canvas responsive to the screen */
 function windowResized(){
