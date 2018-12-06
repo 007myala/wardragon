@@ -7,7 +7,7 @@
      Cross the dragon - combines the interactions from Maria Yala's FindWithFriends
      & Alicia Blakey's Soundbeats & Heartbeats.
 
-     Gets a word found from the wordsearch and passes it to crossthedragon.js to trigger a video projection 
+     Gets a word found from the wordsearch and passes it to crossthedragon.js to trigger a video projection
 
      This code was created with help/reference from examples by Nick Puckett & Kate Hartman
      from the Creation & Computation - Digital Futures, OCAD University
@@ -166,7 +166,15 @@ function draw(){
      fill(0);
      textSize(50);
      textAlign(CENTER);
-     text(currIndustry,750,150);
+     text("Cross the Dragon",850,150);
+     textSize(20);
+     text("Find a word then click the button",850,200);
+     text("to learn more about China\'s economic ",850,225);
+     text("investments in these industries", 850, 250);
+     text("FINANCE", 850, 275);
+     text("REAL ESTATE", 850, 300);
+     text("ENERGY", 850, 325);
+     text("TRANSPORT", 850, 350);
 }
 
 /* Tile class */

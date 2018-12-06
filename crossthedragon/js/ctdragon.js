@@ -19,14 +19,17 @@ var currIndustry = "CROSS THE DRAGON";
 var touchCount = 0;
 
 // Videos
+var vid0;
 var vid1;
 var vid2;
 
 // States
 var state = 0;
-var isPlaying = false;
+var isv1Playing = false;
+var isv2Playing = false;
 
 function preload(){
+     vid0 = createVideo('../crossthedragon/video/ctdlogo.mp4');
      vid1 = createVideo('../crossthedragon/video/Boat.mp4');
      vid2 = createVideo('../crossthedragon/video/Boat_13.mp4');
 }
@@ -56,26 +59,17 @@ function setup(){
      });
 
      vid1.parent('vcontainer');
-     vid1.id('myvid');
+     vid0.id('myvid0');
+     vid1.id('myvid1');
      vid2.id('myvid2');
      vid1.hide();
      vid2.hide();
+
+     // Start the first video projection
+     makeProjectionsInitVid();
 }
 
-function draw(){
-     /* // Testing the ON/OFF functionality
-     if(touchSensorsON){
-          background(255);
-          fill(0);
-     } else {
-          background(0);
-          fill(255);
-     }
-     textSize("60");
-     textAlign(CENTER,CENTER);
-     textSize(50);
-     text(currIndustry, width/2, height/2); */
-}
+function draw(){}
 
 function readIncoming(inMessage){
      // console.log(inMessage);
@@ -85,7 +79,11 @@ function readIncoming(inMessage){
           // console.log(inMessage.message);
           if(mId == 2){
                currIndustry = inMessage.message.ind;
-               //console.log("Current industry is " + currIndustry);
+               console.log("Current industry is " + currIndustry);
+               // Set up the videos as per industry
+               setupProjections(currIndustry);
+               // Start the first projection if in the right state
+               makeProjectionsFirstVid();
           } else {
                // console.log("Not the video 1 category message");
           }
@@ -112,63 +110,81 @@ function dataReceived(){
      } else if(sensorIndicator == 1) {
           touchSensorsON = true;
           print("Sensors are ON");
+          makeProjectionsSecVid();
      } else {
           //print("Something went wrong check 's1' val sent by JSON");
           //print(JSON.parse(rawData).s1);
      }
-     makeProjections();
 }
 
-function mousePressed(){
-     touchSensorsON = true;
-     makeProjections();
+function setupProjections(ind){
+     print("Setup the videos for this industry:" + ind);
 }
 
-function makeProjections(){
+function makeProjectionsInitVid(){
+     if(state == 0){
+          print("Playing the dragon animation");
+          // Stop & hide other videos
+          vid1.pause();
+          vid2.pause();
+          vid1.hide();
+          vid2.hide();
+
+          // Reset isPlaying values
+          isv1Playing = false;
+          isv2Playing = false;
+
+          // Play animation
+          vid0.show();
+          vid0.loop();
+          print("State " + state);
+          state++;
+     } else {
+          // Might be in First or Second vid state
+     }
+}
+
+function makeProjectionsFirstVid(){
+     if(state == 1){
+          // Hide other videos
+          vid2.pause();
+          vid0.pause();
+          vid2.hide();
+          vid0.hide();
+
+          // Update is playing
+          isv2Playing = false;
+
+          // Play this video
+          vid1.show();
+          vid1.loop();
+          print("State " + state);
+          state = 2;
+     } else {
+          // Might be in Init state of Second vid state
+     }
+}
+
+function makeProjectionsSecVid(){
      if(touchSensorsON){
-          // TODO move this stops and pauses into a function 
-          if(state == 0){
-               // Stop & hide other videos
-               vid1.pause();
-               vid2.pause();
-               vid1.hide();
-               vid2.hide();
-
-               // Play animation
-               print("State " + state);
-               state++;
-          } else if(state == 1){
-               // Hide other videos
-               vid2.pause();
-               vid2.hide();
-
-               // Play this video
-               vid1.show();
-               vid1.loop();
-               print("State " + state);
-               state++;
-          } else if(state == 2){
+          // TODO move this stops and pauses into a function
+          if(state == 2){
                // Hide other videos
                vid1.pause();
                vid1.hide();
 
-               // Play this video
-               print("State " + state);
-               vid2.show();
-               vid2.loop();
-               state = 0;
+               // Play this video only if it isn't playing
+               if(!isv2Playing){
+                    print("State " + state);
+                    vid2.show();
+                    vid2.loop();
+                    state = 1; // Reset to 1 so that next projection can be triggered
+                    isv2Playing = true;
+               } else {
+                    // video is already playing don't do anything
+                    // reset in word call - isPlaying() = false;
+               }
           }
-          // Mat has been touched - start a projection
-          /*
-          if(!isPlaying){
-               vid2.pause();
-               vid1.play();
-               isPlaying = true;
-          } else {
-               vid1.pause();
-               vid2.play();
-               isPlaying = false;
-          } */
      } else {
           // Touch sensors are off - ignore
           touchSensorsON = false;

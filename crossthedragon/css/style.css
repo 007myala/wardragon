@@ -12,7 +12,7 @@ body {
      background-color: #e7e7e7;
 }
 
-#myvid, #myvid2 {
+#myvid0, #myvid1, #myvid2 {
      position: fixed;
      right: 0;
      bottom: 0;

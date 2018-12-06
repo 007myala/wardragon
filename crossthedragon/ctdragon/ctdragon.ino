@@ -35,7 +35,7 @@ void loop() {
   //Serial.print(sumOfValues);
   //Serial.print("\n");
   // Sensor on/off
-  if (sumOfValues < 50) {
+  if (sumOfValues < 1000) {
     // Sensor is off
     sensorIndicator = 0;
     // Serial.print("Turning off");
@@ -44,17 +44,20 @@ void loop() {
     sensorIndicator = 1;
     // Serial.print("Turning on");
   }
-  // Use a timer to stabilize sending data
-  if(millis()-lastSend >= sendRate){
-    DynamicJsonBuffer messageBuffer(200); // Create a buffer for the JSON object
-    JsonObject& p5Send = messageBuffer.createObject(); // Create a JsonObject variable in that buffer
-    // Send only when the sensor has been touched
-    if(sensorIndicator == 1){
-      p5Send["s1"] = sensorIndicator; // Assign the ON/OFF indicator to the json object
+
+  if(sensorIndicator == 1){
+    // Use a timer to stabilize sending data
+    if(millis()-lastSend >= sendRate){
+      DynamicJsonBuffer messageBuffer(200); // Create a buffer for the JSON object
+      JsonObject& p5Send = messageBuffer.createObject(); // Create a JsonObject variable in that buffer
+      // Send only when the sensor has been touched
+      p5Send["s1"] = sensorIndicator;
+      p5Send["v1"] = val1;
+      p5Send["v2"] = val2;
+      p5Send["v3"] = val3;// Assign the ON/OFF indicator to the json object
       p5Send.printTo(Serial); // print JSON object to string
       Serial.println(); // print a newline character to the serial port to distinguish between objects
-    lastSend = millis();
+      lastSend = millis();    
     }
-    
   }
 }
