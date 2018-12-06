@@ -16,15 +16,14 @@ var channelName = 'CrossWithFriends';
 
 var title = "CROSS THE DRAGON";
 var currIndustry = "CROSS THE DRAGON";
+var touchCount = 0;
 
 // Videos
 var vid1;
 var vid2;
 
 // States
-var state1 = false; // Project no video
-var state2 = false; // Project video 1
-var state3 = false; // Project video 2
+var state = 0;
 var isPlaying = false;
 
 function preload(){
@@ -58,7 +57,9 @@ function setup(){
 
      vid1.parent('vcontainer');
      vid1.id('myvid');
-     // vid1.loop();
+     vid2.id('myvid2');
+     vid1.hide();
+     vid2.hide();
 }
 
 function draw(){
@@ -118,20 +119,59 @@ function dataReceived(){
      makeProjections();
 }
 
+function mousePressed(){
+     touchSensorsON = true;
+     makeProjections();
+}
+
 function makeProjections(){
      if(touchSensorsON){
+          // TODO move this stops and pauses into a function 
+          if(state == 0){
+               // Stop & hide other videos
+               vid1.pause();
+               vid2.pause();
+               vid1.hide();
+               vid2.hide();
+
+               // Play animation
+               print("State " + state);
+               state++;
+          } else if(state == 1){
+               // Hide other videos
+               vid2.pause();
+               vid2.hide();
+
+               // Play this video
+               vid1.show();
+               vid1.loop();
+               print("State " + state);
+               state++;
+          } else if(state == 2){
+               // Hide other videos
+               vid1.pause();
+               vid1.hide();
+
+               // Play this video
+               print("State " + state);
+               vid2.show();
+               vid2.loop();
+               state = 0;
+          }
           // Mat has been touched - start a projection
+          /*
           if(!isPlaying){
-               //vid2.pause();
+               vid2.pause();
                vid1.play();
                isPlaying = true;
           } else {
                vid1.pause();
-               //vid2.play();
+               vid2.play();
                isPlaying = false;
-          }
+          } */
      } else {
           // Touch sensors are off - ignore
+          touchSensorsON = false;
      }
 }
 
@@ -145,3 +185,12 @@ function ardCon(){
 function windowResized(){
      resizeCanvas(windowWidth, windowHeight);
 }
+
+/*
+     REFERENCES
+     __________
+     Hiding & Showing HTML5 Video - https://creative-coding.decontextualize.com/video/
+     Video array - https://forum.processing.org/two/discussion/23870/p5js-problem-with-asynchronous-video-loading-playing
+     HTML5 Video Features - https://addpipe.com/blog/10-advanced-features-in-html5-video-player/
+     Hiding & Showing video - https://www.reddit.com/r/jquery/comments/2hb4iq/how_can_i_hide_a_html5_video_when_it_finishes/
+*/

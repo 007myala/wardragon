@@ -48,12 +48,13 @@ void loop() {
   if(millis()-lastSend >= sendRate){
     DynamicJsonBuffer messageBuffer(200); // Create a buffer for the JSON object
     JsonObject& p5Send = messageBuffer.createObject(); // Create a JsonObject variable in that buffer
-
-    p5Send["s1"] = sensorIndicator; // Assign the ON/OFF indicator to the json object
-    p5Send.printTo(Serial); // print JSON object to string
-    Serial.println(); // print a newline character to the serial port to distinguish between objects
-
+    // Send only when the sensor has been touched
+    if(sensorIndicator == 1){
+      p5Send["s1"] = sensorIndicator; // Assign the ON/OFF indicator to the json object
+      p5Send.printTo(Serial); // print JSON object to string
+      Serial.println(); // print a newline character to the serial port to distinguish between objects
     lastSend = millis();
-    delay(2000);
+    }
+    
   }
 }
