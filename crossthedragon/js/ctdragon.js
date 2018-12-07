@@ -39,16 +39,13 @@ function preload(){
      videos1[0] = createVideo('../crossthedragon/video/transportV1.mp4');
      videos1[1] = createVideo('../crossthedragon/video/energyV1.mp4');
      videos1[2] = createVideo('../crossthedragon/video/realestateV1.mp4');
-     //videos1[3] = createVideo('../crossthedragon/video/financeV1.mp4');
-     videos1[3] = createVideo('../crossthedragon/video/Boat.mp4');
+     videos1[3] = createVideo('../crossthedragon/video/financeV1.mp4');
 
      // Second videos
      videos2[0] = createVideo('../crossthedragon/video/transportV2.mp4');
-     //videos2[1] = createVideo('../crossthedragon/video/energyV2.mp4');
+     videos2[1] = createVideo('../crossthedragon/video/energyV2.mp4');
      videos2[2] = createVideo('../crossthedragon/video/realestateV2.mp4');
-     //videos2[3] = createVideo('../crossthedragon/video/financeV2.mp4');
-     videos2[1] = createVideo('../crossthedragon/video/Boat_13.mp4');
-     videos2[3] = createVideo('../crossthedragon/video/Boat_13.mp4');
+     videos2[3] = createVideo('../crossthedragon/video/financeV2.mp4');
 }
 
 function setup(){
