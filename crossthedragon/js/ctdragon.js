@@ -22,6 +22,8 @@ var touchCount = 0;
 var vid0;
 var vid1;
 var vid2;
+var videos1 = []; // First videos
+var videos2 = []; // Second videos
 
 // States
 var state = 0;
@@ -29,9 +31,24 @@ var isv1Playing = false;
 var isv2Playing = false;
 
 function preload(){
+     // Init videos
      vid0 = createVideo('../crossthedragon/video/ctdlogo.mp4');
-     vid1 = createVideo('../crossthedragon/video/Boat.mp4');
-     vid2 = createVideo('../crossthedragon/video/Boat_13.mp4');
+
+     // Transport 0, Energy 1, Real estate 2, Finance 3
+     // First videos
+     videos1[0] = createVideo('../crossthedragon/video/transportV1.mp4');
+     videos1[1] = createVideo('../crossthedragon/video/energyV1.mp4');
+     videos1[2] = createVideo('../crossthedragon/video/realestateV1.mp4');
+     //videos1[3] = createVideo('../crossthedragon/video/financeV1.mp4');
+     videos1[3] = createVideo('../crossthedragon/video/Boat.mp4');
+
+     // Second videos
+     videos2[0] = createVideo('../crossthedragon/video/transportV2.mp4');
+     //videos2[1] = createVideo('../crossthedragon/video/energyV2.mp4');
+     videos2[2] = createVideo('../crossthedragon/video/realestateV2.mp4');
+     //videos2[3] = createVideo('../crossthedragon/video/financeV2.mp4');
+     videos2[1] = createVideo('../crossthedragon/video/Boat_13.mp4');
+     videos2[3] = createVideo('../crossthedragon/video/Boat_13.mp4');
 }
 
 function setup(){
@@ -58,12 +75,28 @@ function setup(){
           channels: [channelName]
      });
 
+     // hide the videos
+     for(var i = 0; i < videos1.length; i++){
+          var vid = videos1[i];
+          vid.hide();
+     }
+
+     for(var i = 0; i < videos2.length; i++){
+          var vid = videos2[i];
+          vid.hide();
+     }
+
+     // Initialize the video variables
+     vid1 = videos1[0];
+     vid2 = videos2[0];
+
+     // Link to css tags
+     vid0.parent('vcontainer');
      vid1.parent('vcontainer');
+     vid2.parent('vcontainer');
      vid0.id('myvid0');
-     vid1.id('myvid1');
-     vid2.id('myvid2');
-     vid1.hide();
-     vid2.hide();
+     //vid1.id('myvid1');
+     //vid2.id('myvid2');
 
      // Start the first video projection
      makeProjectionsInitVid();
@@ -117,8 +150,29 @@ function dataReceived(){
      }
 }
 
+/* Sets up the vid1 and vid2 according to the industries */
 function setupProjections(ind){
+     vid1.hide();
+     vid2.hide();
      print("Setup the videos for this industry:" + ind);
+     if(ind == "Transport"){
+          vid1 = videos1[0];
+          vid2 = videos2[0];
+     } else if(ind == "Energy"){
+          vid1 = videos1[1];
+          vid2 = videos2[1];
+     } else if(ind == "Real Estate"){
+          vid1 = videos1[2];
+          vid2 = videos2[2];
+     } else if(ind == "Finance"){
+          vid1 = videos1[3];
+          vid2 = videos2[3];
+     } else {
+          vid1 = vid0;
+          vid2 = vid0;
+     }
+     vid1.id('myvid1');
+     vid2.id('myvid2');
 }
 
 function makeProjectionsInitVid(){
@@ -175,6 +229,7 @@ function makeProjectionsSecVid(){
 
                // Play this video only if it isn't playing
                if(!isv2Playing){
+                    print("Playing vid 2");
                     print("State " + state);
                     vid2.show();
                     vid2.loop();
