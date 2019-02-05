@@ -8,11 +8,15 @@ function Country(code,lat,long,name) {
 
      this.display = function(){
           fill(0);
-          noStroke();
           // Draw a dot
           ellipse(this.x,this.y,10,10);
           // print(this.name + " (" + this.x + ", " + this.y + ")");
+     }
 
+     this.drawMarker = function(){
+          fill(255);
+          noStroke();
+          ellipse(this.x,this.y,10,10);
      }
 
      this.translate = function(mW,mH){
@@ -40,8 +44,8 @@ function Country(code,lat,long,name) {
                // Country has been clicked
                print("Country is clicked");
                // Show the Country
-               fill(180,0,0);
-               textSize(12);
+               fill(255);
+               textSize(14);
                text(this.name,mX,mY);
                currCountry = this.name;
                // Country found send message
