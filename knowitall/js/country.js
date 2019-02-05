@@ -40,9 +40,12 @@ function Country(code,lat,long,name) {
                // Country has been clicked
                print("Country is clicked");
                // Show the Country
-               fill(100,0,0);
-               text(12);
+               fill(180,0,0);
+               textSize(12);
                text(this.name,mX,mY);
+               currCountry = this.name;
+               // Country found send message
+               sendTheMessage();
           } else {
                //print("Country not clicked");
           }
