@@ -1,13 +1,11 @@
 /*
- *
+ * Weather Tarot by Maria Yala
  *
  * Code creted using reference from template below:
  * Ubiquitous Computing - Digital Futures, OCAD University
  * Kate Hartman / Nick Puckett
  *
  * Uses a PubNub function to query the Wolfram Conversation API
- *
- *
  */
 
 // server variables
@@ -16,33 +14,43 @@ var dataServer;
 var pubKey = 'pub-c-9c3e6d99-ba98-485c-befc-9faf7976f92e';
 var subKey = 'sub-c-40fa9ee4-23f1-11e9-8321-261899e2d3ad';
 
+var canvas;
+var countries = []; // an array to hold countries
+
 //input variables
 var sendText;
 var sendButton;
 
 //size of the active area
-var cSizeX = 900;
-var cSizeY = 600;
+var cSizeX; //= 1300; //900;
+var cSizeY;// = 600;
 
 var returnedAnswer = [];
-
-// latitude & longitude
-var clat = ''; // country latitude
-var clong = ''; // country longitude
-var code;
-var cname;
 
 var mapWidth, mapHeight;
 
 
-
 //This must match the channel you set up in your function
 var channelName = "wolfram";
+var currCountry;
+
+let tableVar;
+
+function preload(){
+     // Load the csv file.
+     tableVar = loadTable('countries.csv','csv','header');
+     print("Preload called");
+}
 
 function setup()
 {
   getAudioContext().resume();
-  createCanvas(cSizeX, cSizeY);
+  cSizeX = windowWidth;
+  cSizeY = windowHeight;
+  print("Screen width " + cSizeX);
+  print("Screen height " + cSizeY);
+  canvas = createCanvas(cSizeX, cSizeY);
+  canvas.style('display','block');
   background(255);
 
   mapWidth = cSizeX;
@@ -63,6 +71,7 @@ function setup()
   dataServer.addListener({ message: readIncoming})
   dataServer.subscribe({channels: [channelName]});
 
+  /*
   //create the text fields for the message to be sent
   sendText = createInput();
   sendText.position(5,height);
@@ -70,6 +79,7 @@ function setup()
   sendButton = createButton('Ask a Question');
   sendButton.position(sendText.x + sendText.width,height);
   sendButton.mousePressed(sendTheMessage);
+  */
 
   // Read the countries.csv file and load countries
   loadCountries();
@@ -79,31 +89,45 @@ function draw(){
      drawCountries();
 }
 
-function drawCountries(){
-     // code, latitude, longitude, name
-     /*code = "KE";
-     clat = -0.023559;
-     clong = 37.906193;
-     cname = "Kenya";
+function loadCountries(){
+     print("Load Countries called!");
+     var cd =0;
+     var lt =0;
+     var lg = 0;
+     var n = 0;
+     for(let r = 0; r < tableVar.getRowCount(); r++){
+          for(let c = 0; c < tableVar.getColumnCount(); c++){
+               if(c == 0){
+                    // Country code
+                    cd = tableVar.getString(r,c);
+                    //print(cd);
+               } else if(c == 1){
+                    // Latitude
+                    lt = tableVar.getString(r,c);
+                    //print(lt);
+               } else if(c == 2){
+                    // Longitude
+                    lg = tableVar.getString(r,c);
+                    //print(lg);
+               } else if (c == 3){
+                    // Country name
+                    n = tableVar.getString(r,c);
+                    //print(n);
+               }
+          }
+          // draw the countries
+          drawCountries(cd,lt,lg,n);
+     }
 
-     code = "CA";
-     clat = 56.130366;
-     clong = -106.346771;
-     cname = "Canada";
 
-     code ="US";
-     clat = 37.09024;
-     clong = -95.712891;
-     cname = "United States";*/
+}
 
-     code = "SD";
-     clat = 12.862807;
-     clong = 30.217636;
-     cname = "Sudan";
-
+function drawCountries(code,clat,clong,cname){
      var country = new Country(code,clat,clong,cname);
      country.translate(mapWidth,mapHeight);
      country.display();
+     // save the country
+     countries.push(country);
 }
 
 
@@ -132,7 +156,13 @@ function readIncoming(inMessage) //when new data comes in it triggers this funct
     textSize(20);
     text(inMessage.message.answer, 5, height/2);
     returnedAnswer=inMessage.message.answer.split(" ");
+}
 
+function mouseClicked(){
+     // Check if country was clicked
+     for(var i = 0; i < countries.length; i++){
+          countries[i].clickCheck(mouseX,mouseY);
+     }
 }
 
 function whoisconnected(connectionInfo)
