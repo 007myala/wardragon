@@ -1,3 +1,12 @@
+html {
+     overflow: hidden;
+}
+
+::-webkit-scrollbar {
+     width: 0px;
+     background: #transparent;
+}
+
 body {
      margin: 0;
      padding: 0;
@@ -20,13 +29,14 @@ body {
 
 #myvid0, #myvid1, #myvid2 {
      position:fixed;
-     bottom:0;
      left:0;
-     right: 0;
      top: 0;
-
      width: 80% !important;
      height: auto !important;
      min-width: 95% !important;
      min-height: 80% !important;
+}
+
+#myvid1, #myvid2 {
+     /*margin-top: -50px !important;*/
 }

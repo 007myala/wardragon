@@ -11,15 +11,27 @@ Servo myservo; // servo object to control a servo
 
 int incomingByte; // read incoming serial data
 int pos = 0; // servo position
+int radioID = 12;
 
 void setup() {
   // initializee serial communication;
+  Serial.begin(9600);
   Serial1.begin(9600);
   // Attach servo on pin 9
   myservo.attach(9);
 }
 
 void loop() {
+  // read the input on analog pin 0;
+  int sensorValue = analogRead(A0);
+  Serial1.print(radioID);
+  Serial.print(radioID);
+  Serial1.print(",");
+  Serial.print(",");
+  Serial1.println(sensorValue);
+  Serial.println(sensorValue);
+  delay(200);
+  /*
   // See if there is incoing serial data
   if (Serial1.available() > 0){
     // Read the oldest byte in the serial buffer
@@ -51,4 +63,5 @@ void loop() {
       }
     }
   }
+  */
 }

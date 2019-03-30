@@ -1,5 +1,8 @@
 /*
  * Arduino / Xbee - Silent Alarm
+ * A Spinning Wheel Visual Desk Alarm that creates a spinning 
+ * optical illusion when 
+ * By Maria Yala
  * 
  * Code was created using reference from the following sources
  * http://www.arduino.cc/en/Tutorial/PhysicalPixel 

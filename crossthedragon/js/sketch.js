@@ -164,17 +164,17 @@ function draw(){
 
      // Draw the hints
      fill(0);
-     textSize(50);
+     textSize(40);
      textAlign(CENTER);
-     text("Cross the Dragon",850,150);
+     text("Cross the Dragon",800,150);
      textSize(20);
-     text("Find a word then click the button",850,200);
-     text("to learn more about China\'s economic ",850,225);
-     text("investments in these industries", 850, 250);
-     text("FINANCE", 850, 275);
-     text("REAL ESTATE", 850, 300);
-     text("ENERGY", 850, 325);
-     text("TRANSPORT", 850, 350);
+     text("Find a word then click the button",800,200);
+     text("to learn more about China\'s economic ",800,225);
+     text("investments in these industries", 800, 250);
+     text("FINANCE", 800, 275);
+     text("REAL ESTATE", 800, 300);
+     text("ENERGY", 800, 325);
+     text("TRANSPORT", 800, 350);
 }
 
 /* Tile class */

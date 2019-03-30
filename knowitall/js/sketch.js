@@ -25,6 +25,7 @@ var sendButton;
 var cSizeX; //= 1300; //900;
 var cSizeY;// = 600;
 
+
 var returnedAnswer = [];
 var dateTime = [];
 
@@ -33,6 +34,8 @@ var mapWidth, mapHeight;
 //This must match the channel you set up in your function
 var channelName = "wolfram";
 var currCountry;
+var countryDotX;
+var countryDotY;
 
 let tableVar;
 
@@ -304,6 +307,11 @@ function drawMarkers(){
      fill(255);
      textSize(24);
      text(currCountry,3*windowWidth/4,windowHeight-50);
+
+     // draw the draw
+     fill(0);
+     noStroke();
+     ellipse(countryDotX,countryDotY,10,10);
 }
 
 function mouseClicked(){

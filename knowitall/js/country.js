@@ -49,7 +49,11 @@ function Country(code,lat,long,name) {
                text(this.name,mX,mY);
                currCountry = this.name;
                // Country found send message
+               // Draw Ellipse draw
+               countryDotX = this.x;
+               countryDotY = this.y;
                sendTheMessage();
+               //
           } else {
                //print("Country not clicked");
           }
