@@ -53,17 +53,13 @@ var apitL;
 
 let foundPose = false;
 
-var l;
-var rootBtm = 616;
-
-var body;
-
+let spaceBg;
 
 function setup(){
     canvas = createCanvas(windowWidth,windowHeight);
     canvas.style('display','block');
-    
-    body = loadImage("images/silhouette.png");
+
+    spaceBg = loadImage('images/spaceBg.jpg');
 
     angle = PI/6;
     video = createCapture(VIDEO);
@@ -77,17 +73,14 @@ function setup(){
     apitL = PI/6;
 
     makeTree();
-    
-    l = 40;
-  
 }
 
 function makeTree(){
     // create point vectors
-    var a = createVector(width/2, rootBtm);
-    var b = createVector(width/2, rootBtm-200);
+    var a = createVector(width/2, 3*height/4);
+    var b = createVector(width/2, (3*height/4)-150);
 
-    var root = new Branch(a,b,bSize,angle, 0);
+    var root = new Branch(a,b,bSize,angle);
     tree[0] = root;
 
     for(var i = 0; i <= 7; i++){
@@ -133,9 +126,9 @@ function modelReady(){
 
 /* Reference: http://p5js.org/reference/#/p5.Vector/angleBetween */
 function draw(){
-    background(255);
-    imageMode(CENTER);
-    image(body, width/2, 490);
+    background(21,45,71);
+
+    // image(spaceBg, 0, 0, width, height);
 
     var aR = degrees(apitR).toFixed(2);
     var aL = degrees(apitL).toFixed(2);
@@ -173,34 +166,18 @@ function draw(){
     }
 
     // earth crust
+    // fill(0,0,255,100);
     fill(255);
-    strokeWeight(10);
-    stroke(0);
-    ellipseMode(CENTER);
-    ellipse(width/2, 308, 200, 200);
-    
-    // birds
-    noStroke()
-    fill(0,0,0);
-    translate(noseX, noseY-50);
-    beginShape();
-        curveVertex(-12, -6);
-        curveVertex(-12, -6);
-        curveVertex(0, 0);
-        curveVertex(6, -10);
-        curveVertex(5, 0);
-        curveVertex(5, 2);
-        curveVertex(10, 2);
-        curveVertex(5, 4);
-        curveVertex(0, 12);
-        curveVertex(-8, 16);
-        curveVertex(-1.5, 8);
-        curveVertex(-2, 4);
-        curveVertex(-5, 1);
-        curveVertex(-12, -6);
-        curveVertex(-12, -6);
-    endShape();
-    
+    // arc (x, y, w, h, start, stop, [mode]) - xywh give the bounding box, start - stop angles
+    arc(width/2, 3*height/4, 280, 280, 0, PI);
+
+    // hill
+    // fill(0,255,255);
+    // triangle(width/2 - 100, 3*height/4, width/2 + 40, 3*height/4, width/2 - 50, 3*height/4 - 250);
+
+    // sun
+    fill(255, 255, 0, 100);
+    ellipse(100, 100, 75, 75);
 }
 
 function getPitRAngle(){
@@ -231,6 +208,9 @@ function getPitLAngle(){
 
      var v3 = createVector(p4.x-p3.x, p4.y-p3.y);
      var v4 = createVector(p5.x-p3.x, p5.y-p3.y);
+
+     // drawArrow(p3,v3,'green');
+     // drawArrow(p3,v4,'yellow');
 
      var angleBetween0 = v3.angleBetween(v4);
      var NAngle0 = angleBetween0.toFixed(2);

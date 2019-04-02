@@ -9,6 +9,7 @@ let poses = [];
 let skeletons = [];
 var angle = 0;
 var slider; // start, stop, step-size
+
 var tree = [];
 var leaves = [];
 var count = 0;

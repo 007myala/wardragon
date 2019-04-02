@@ -1,5 +1,5 @@
 /*
- * soma Garden
+ * Learning PoseNet - Sketch draws a clown nose and black dot over one's left eye
  * Code written following tutuorial by The Coding Train by Daniel Shiffman at https://youtu.be/EA3-k9mnLHs
  */
 var canvas;
@@ -7,13 +7,6 @@ let video;
 let poseNet;
 let poses = [];
 let skeletons = [];
-
-var tree = [];
-var leaves = [];
-var count = 0;
-var bSize = 10;
-
-var angle = 0;
 
 let rWristX = 0; // Start lerp positions
 let rWristY = 0;
@@ -51,78 +44,20 @@ let hlY; // End keypoint data
 var apitR;
 var apitL;
 
-let foundPose = false;
-
-var l;
-var rootBtm = 616;
-
-var body;
-
+// Branch size
+var bSize = 10;
 
 function setup(){
-    canvas = createCanvas(windowWidth,windowHeight);
-    canvas.style('display','block');
-    
-    body = loadImage("images/silhouette.png");
-
-    angle = PI/6;
+    canvas = createCanvas(windowWidth, windowHeight);
     video = createCapture(VIDEO);
     video.size(640,480);
+    val = width/2;
     poseNet = ml5.poseNet(video, modelReady); // Load the poseNet model
     poseNet.on('pose', gotPoses);
     video.hide();
     video.loop();
-
     apitR = PI/4;
     apitL = PI/6;
-
-    makeTree();
-    
-    l = 40;
-  
-}
-
-function makeTree(){
-    // create point vectors
-    var a = createVector(width/2, rootBtm);
-    var b = createVector(width/2, rootBtm-200);
-
-    var root = new Branch(a,b,bSize,angle, 0);
-    tree[0] = root;
-
-    for(var i = 0; i <= 7; i++){
-         makeBranches();
-    }
-}
-
-function emptyTree(){
-     tree = [];
-     leaves = [];
-     count = 0;
-     bSize = 10;
-     depth = 0;
-}
-
-function makeBranches(){
-     for(var i = tree.length - 1; i >= 0; i--){
-          if (!tree[i].finished){
-               tree.push(tree[i].branchR(bSize,apitR));
-               tree.push(tree[i].branchL(bSize,apitL));
-          }
-          tree[i].finished = true;
-          bSize = bSize-1;
-     }
-
-     count++;
-
-     if(count === 8){
-          for (var i = 0; i < tree.length; i++){
-               if(!tree[i].finished){
-                    var leaf = tree[i].end.copy();
-                    leaves.push(leaf);
-               }
-          }
-     }
 }
 
 /* Function callback for when ml5 successfully opens */
@@ -133,74 +68,32 @@ function modelReady(){
 
 /* Reference: http://p5js.org/reference/#/p5.Vector/angleBetween */
 function draw(){
-    background(255);
-    imageMode(CENTER);
-    image(body, width/2, 490);
-
     var aR = degrees(apitR).toFixed(2);
     var aL = degrees(apitL).toFixed(2);
 
     if(aR >= 20 && aL >= 20 ){
          // Release birds
-         // background(0);
-    } else if((aR >= 10 && aR < 20) && (aL >= 10 && aL < 20)){
-         // background(0,255,0);
+         background(0);
     } else {
-         // background(255);
+         background(255);
     }
 
     getPitRAngle();
     getPitLAngle();
 
-    // empty tree list
-    emptyTree();
-    // redraw the tree with new angle
-    makeTree();
+    // markers();
 
-    for (var i = 0; i < tree.length; i++){
-         tree[i].show();
-         //tree[i].jitter();
-    }
+    // text
+    noStroke();
+    textSize(20);
+    text(degrees(apitR).toFixed(2), 100, 50);
+    text(degrees(apitL).toFixed(2), 100, 100);
 
-    for (var i = 0; i < leaves.length; i++){
-         fill(0,128,0, 100);
-         // fill(255, 255, 255, 100);
-         noStroke();
-         ellipse(leaves[i].x, leaves[i].y, 15, 15);
-         // leaves[i].y += random(0, 1); // drop the leaves --- simulate life death
-         // leaves[i].x += random(-5,5); // shake leaves
-         // tree[i].jitter();
-    }
-
-    // earth crust
-    fill(255);
-    strokeWeight(10);
+    // draw the tree
     stroke(0);
-    ellipseMode(CENTER);
-    ellipse(width/2, 308, 200, 200);
-    
-    // birds
-    noStroke()
-    fill(0,0,0);
-    translate(noseX, noseY-50);
-    beginShape();
-        curveVertex(-12, -6);
-        curveVertex(-12, -6);
-        curveVertex(0, 0);
-        curveVertex(6, -10);
-        curveVertex(5, 0);
-        curveVertex(5, 2);
-        curveVertex(10, 2);
-        curveVertex(5, 4);
-        curveVertex(0, 12);
-        curveVertex(-8, 16);
-        curveVertex(-1.5, 8);
-        curveVertex(-2, 4);
-        curveVertex(-5, 1);
-        curveVertex(-12, -6);
-        curveVertex(-12, -6);
-    endShape();
-    
+    strokeWeight(2);
+    translate(width/2,height);
+    branch(150);
 }
 
 function getPitRAngle(){
@@ -212,15 +105,14 @@ function getPitRAngle(){
      var v1 = createVector(p1.x-p0.x, p1.y-p0.y);
      var v2 = createVector(p2.x-p0.x, p2.y-p0.y);
 
-     var angleBetween = v1.angleBetween(v2);
+     drawArrow(p0,v1,'red');
+     drawArrow(p0,v2,'blue');
+
+     let angleBetween = v1.angleBetween(v2);
      var NAngle = angleBetween.toFixed(2);
 
      // Map function - val to map, min, max, min val to map to, max val to map to
-     if(foundPose){
-          apitR = map(NAngle, 0, TWO_PI, 0, 1);
-     } else {
-          apitR = PI/4;
-     }
+     apitR = map(NAngle, 0, TWO_PI, 0, 1);
 }
 
 function getPitLAngle(){
@@ -232,15 +124,46 @@ function getPitLAngle(){
      var v3 = createVector(p4.x-p3.x, p4.y-p3.y);
      var v4 = createVector(p5.x-p3.x, p5.y-p3.y);
 
-     var angleBetween0 = v3.angleBetween(v4);
+     drawArrow(p3,v3,'green');
+     drawArrow(p3,v4,'yellow');
+
+     let angleBetween0 = v3.angleBetween(v4);
      var NAngle0 = angleBetween0.toFixed(2);
 
-     if(foundPose){
-          apitL = map(NAngle0, 0, TWO_PI, 0, 1);
-     } else {
-          apitL = PI/6;
-     }
+     apitL = map(NAngle0, 0, TWO_PI, 0, 1);
+}
 
+function markers(){
+     // draw markers
+     fill(0, 0, 0);
+     // ellipse(noseX, noseY, 10, 10);
+     ellipse(rWristX, rWristY, 10, 10);
+     ellipse(rShoulderX, rShoulderY, 15, 15);
+     ellipse(rHipX, rHipY, 20, 20);
+
+     fill(0, 255, 0);
+     ellipse(lWristX, lWristY, 10, 10);
+     ellipse(lShoulderX, lShoulderY, 15, 15);
+     ellipse(lHipX, lHipY, 20, 20);
+}
+
+function branch(len){
+    // draw the trunk
+    line(0, 0, 0, - len);
+    translate(0, -len);
+    if (len > 4){
+        // draw the left and right branches
+        push(); // save the transformation state
+        rotate(apitR);
+        //rotate(PI/4);
+        branch(len*0.67);
+        pop(); // restore the state
+        push();
+        rotate(-apitL);
+        //rotate(-PI/6);
+        branch(len*0.67);
+        pop();
+    }
 }
 
 /* Function callback for when a pose is detected
@@ -250,7 +173,6 @@ function gotPoses(poses){
     //console.log(poses);
     /* Track nose when atleast one pose is detected */
     if(poses.length > 0 ){
-        foundPose = true;
         // right Side
         wX = poses[0].pose.keypoints[10].position.x;
         wY = poses[0].pose.keypoints[10].position.y;
@@ -283,9 +205,7 @@ function gotPoses(poses){
         lShoulderY = lerp(lShoulderY, slY, 0.5);
         lHipX = lerp(lHipX, hlX, 0.5);
         lHipY = lerp(lHipY, hlY, 0.5);
-   } else {
-        foundPose = false;
-   }
+    }
 }
 
 // draw an arrow for a vector at a given base position
@@ -304,5 +224,5 @@ function drawArrow(base, vec, myColor) {
 }
 
 function windowResized(){
-    resizeCanvas(windowWidth,windowHeight);
+    //resizeCanvas(windowWidth,windowHeight);
 }

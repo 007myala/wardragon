@@ -53,17 +53,14 @@ var apitL;
 
 let foundPose = false;
 
-var l;
-var rootBtm = 616;
-
-var body;
-
+let greenBg;
+let yoff = 0.0; // 2nd dimension of perlin noise
 
 function setup(){
     canvas = createCanvas(windowWidth,windowHeight);
     canvas.style('display','block');
-    
-    body = loadImage("images/silhouette.png");
+
+    greenBg = loadImage('images/greenBg.jpg');
 
     angle = PI/6;
     video = createCapture(VIDEO);
@@ -77,17 +74,14 @@ function setup(){
     apitL = PI/6;
 
     makeTree();
-    
-    l = 40;
-  
 }
 
 function makeTree(){
     // create point vectors
-    var a = createVector(width/2, rootBtm);
-    var b = createVector(width/2, rootBtm-200);
+    var a = createVector(width/2, 3*height/4);
+    var b = createVector(width/2, (3*height/4)-150);
 
-    var root = new Branch(a,b,bSize,angle, 0);
+    var root = new Branch(a,b,bSize,angle);
     tree[0] = root;
 
     for(var i = 0; i <= 7; i++){
@@ -134,8 +128,6 @@ function modelReady(){
 /* Reference: http://p5js.org/reference/#/p5.Vector/angleBetween */
 function draw(){
     background(255);
-    imageMode(CENTER);
-    image(body, width/2, 490);
 
     var aR = degrees(apitR).toFixed(2);
     var aL = degrees(apitL).toFixed(2);
@@ -148,6 +140,7 @@ function draw(){
     } else {
          // background(255);
     }
+
 
     getPitRAngle();
     getPitLAngle();
@@ -164,7 +157,6 @@ function draw(){
 
     for (var i = 0; i < leaves.length; i++){
          fill(0,128,0, 100);
-         // fill(255, 255, 255, 100);
          noStroke();
          ellipse(leaves[i].x, leaves[i].y, 15, 15);
          // leaves[i].y += random(0, 1); // drop the leaves --- simulate life death
@@ -172,35 +164,23 @@ function draw(){
          // tree[i].jitter();
     }
 
+    // text
+    // noStroke();
+    // textSize(20);
+    // text("Right " + degrees(apitR).toFixed(2), 100, 50);
+    // text("Left " + degrees(apitL).toFixed(2), 100, 100);
+
     // earth crust
-    fill(255);
-    strokeWeight(10);
-    stroke(0);
-    ellipseMode(CENTER);
-    ellipse(width/2, 308, 200, 200);
-    
-    // birds
-    noStroke()
-    fill(0,0,0);
-    translate(noseX, noseY-50);
-    beginShape();
-        curveVertex(-12, -6);
-        curveVertex(-12, -6);
-        curveVertex(0, 0);
-        curveVertex(6, -10);
-        curveVertex(5, 0);
-        curveVertex(5, 2);
-        curveVertex(10, 2);
-        curveVertex(5, 4);
-        curveVertex(0, 12);
-        curveVertex(-8, 16);
-        curveVertex(-1.5, 8);
-        curveVertex(-2, 4);
-        curveVertex(-5, 1);
-        curveVertex(-12, -6);
-        curveVertex(-12, -6);
-    endShape();
-    
+    fill(0,0,255,100);
+    // arc (x, y, w, h, start, stop, [mode]) - xywh give the bounding box, start - stop angles
+    arc(width/2, 3*height/4, 280, 280, 0, PI);
+    // hill
+    // fill(0,255,255);
+    // triangle(width/2 - 100, 3*height/4, width/2 + 40, 3*height/4, width/2 - 50, 3*height/4 - 250);
+
+    // sun
+    fill(255, 255, 0, 100);
+    ellipse(100, 100, 75, 75);
 }
 
 function getPitRAngle(){
@@ -212,6 +192,9 @@ function getPitRAngle(){
      var v1 = createVector(p1.x-p0.x, p1.y-p0.y);
      var v2 = createVector(p2.x-p0.x, p2.y-p0.y);
 
+     // drawArrow(p0,v1,'red');
+     // drawArrow(p0,v2,'blue');
+
      var angleBetween = v1.angleBetween(v2);
      var NAngle = angleBetween.toFixed(2);
 
@@ -221,6 +204,7 @@ function getPitRAngle(){
      } else {
           apitR = PI/4;
      }
+
 }
 
 function getPitLAngle(){
@@ -231,6 +215,9 @@ function getPitLAngle(){
 
      var v3 = createVector(p4.x-p3.x, p4.y-p3.y);
      var v4 = createVector(p5.x-p3.x, p5.y-p3.y);
+
+     // drawArrow(p3,v3,'green');
+     // drawArrow(p3,v4,'yellow');
 
      var angleBetween0 = v3.angleBetween(v4);
      var NAngle0 = angleBetween0.toFixed(2);
